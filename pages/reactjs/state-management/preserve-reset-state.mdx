@@ -1,0 +1,115 @@
+import { Callout } from "nextra/components";
+
+## `Preserving` and `Resetting` State (Default Methods)
+
+React application এর ক্ষেত্রে State খুবই গুরুত্বপূর্ণ। যদি সঠিকভাবে State management করা সম্ভব না হয়, তাহলে সম্পূর্ণ application -টি ব্যর্থ হয়ে যাবে। আর এই State কখন Preserve করতে পারে আর কখন Reset হয়ে যায় সেটা জানা খুবই জরুরী।
+
+### State is tied to a position in the render tree ([Reference](https://react.dev/learn/preserving-and-resetting-state#state-is-tied-to-a-position-in-the-tree))
+
+যখন কোন একটি component এর মধ্যে Locally State management করা হয়, তখন ঐ Component টি যেকোন parent component এর মধ্যে যতবারই Re-use করা হবে, প্রতিবারই ঐ child component নতুন নতুন State manage করবে প্রতিটা re-used component এর মধ্যে। এর ফলে ঐ child component এর মধ্যে কোন পরিবর্তন হলে, অন্য component এর মধ্যে কোন প্রকার পরিবর্তন হবে না।
+
+```js copy filename="App.jsx"
+import { useState } from "react";
+
+export default function App() {
+  return (
+    <>
+      <Counter />
+      <Counter />
+    </>
+  );
+}
+```
+
+```js copy filename="Counter.jsx"
+export default function Counter() {
+  const [score, setScore] = useState(0);
+  const [hover, setHover] = useState(false);
+
+  let className = "counter";
+  if (hover) {
+    className += " hover";
+  }
+
+  return (
+    <div
+      className={className}
+      onPointerEnter={() => setHover(true)}
+      onPointerLeave={() => setHover(false)}
+    >
+      <h1>{score}</h1>
+      <button onClick={() => setScore(score + 1)}>Add one</button>
+    </div>
+  );
+}
+```
+
+<Callout type="info">
+  উপরের কোড যদি আমরা run করি তাহলে দুইটা আলাদা Counter পাবো, যেটার একটা পরিবর্তন
+  এর জন্য অন্যটিতে কোন প্রকার পরিবর্তন হবে না। কেননা, component একই হলে, render
+  এর position ভিন্ন। আর render position ভিন্ন হলে, react সেটাকে different
+  component হিসেবে ধরে কাজ করে থাকে। এভাবেই state preserve করে থাকে।
+</Callout>
+
+### Same component at the same position preserves state ([Reference](https://react.dev/learn/preserving-and-resetting-state#same-component-at-the-same-position-preserves-state))
+
+Render tree এর একই position এ যদি হুবহু একই রকমের component render করতে পারি,তাহলে state preserve করে থাকে।
+
+```js copy filename="App.jsx"
+import { useState } from "react";
+
+export default function App() {
+  const [isFancy, setIsFancy] = useState(false);
+  return (
+    <div>
+      {isFancy ? <Counter isFancy={true} /> : <Counter isFancy={false} />}
+      <label>
+        <input
+          type="checkbox"
+          checked={isFancy}
+          onChange={(e) => {
+            setIsFancy(e.target.checked);
+          }}
+        />
+        Use fancy styling
+      </label>
+    </div>
+  );
+}
+```
+
+```js copy filename="Counter.jsx"
+function Counter({ isFancy }) {
+  const [score, setScore] = useState(0);
+  const [hover, setHover] = useState(false);
+
+  let className = "counter";
+  if (hover) {
+    className += " hover";
+  }
+  if (isFancy) {
+    className += " fancy";
+  }
+
+  return (
+    <div
+      className={className}
+      onPointerEnter={() => setHover(true)}
+      onPointerLeave={() => setHover(false)}
+    >
+      <h1>{score}</h1>
+      <button onClick={() => setScore(score + 1)}>Add one</button>
+    </div>
+  );
+}
+```
+
+<Callout type="info">
+  উপরের কোড এর `App.jsx` আমরা দেখতে পারি `isFancy` যদি true হয় তাহলে Counter
+  component এর props এর মধ্যে true যাচ্ছে, আর `isFancy` যদি false হয় তাহলে
+  Counter component এর মধ্যে false যাচ্ছে। আমরা যেহেতু isFancy এর উপর নির্ভর করে
+  Counter component render করছি, এতে আমাদের মনে হতেই পারে এখানে ভিন্ন state
+  manage হবে। কিন্তু props এর মধ্যে ভিন্ন Data pass করলেও render tree এর একই
+  position এর একদম হুবহু আগের component দেওয়া হচ্ছে, তাই এক্ষেত্রে State reset
+  হবে না।
+</Callout>

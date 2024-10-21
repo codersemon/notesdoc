@@ -1,6 +1,7 @@
 const rootRoute = {
   reactjs: "React JS",
   nextjs: "Next JS",
+  firebase: "Firebase",
   contact: {
     title: "Contact",
     type: "page",

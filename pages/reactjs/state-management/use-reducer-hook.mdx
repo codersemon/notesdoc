@@ -1,0 +1,62 @@
+import { Callout, Steps } from "nextra/components";
+
+## useReducer কেন প্রয়োজন?
+
+যখন `useState` hook ব্যবহার করি, তখন application এর সব business logics component এর মধ্যে রেখেই state manage করা হয়ে থাকে। কিন্তু, বড় application এ অনেক বেশি business logics handle করতে হয়। এতে component এর মধ্যে complexity বৃদ্ধি পায়। `useReducer` hook ব্যবহার করলে component এর বাইরে একটা central জায়গায় খুব সহজেই business logics handle করা সম্ভব হবে।
+
+## useReducer hook এর ব্যবহার
+
+৩ টা স্টেপে আমাদের react project এ `useState` এর পরিবর্তে `useReducer` hook ব্যবহার করতে পারি। যেগুলো হচ্ছেঃ
+
+<Steps>
+### import useReducer & initilaize
+প্রথমে react package থেকে useReducer named import করতে হবে। 
+```js copy 
+import {useReducer} from "react"
+```
+এরপরে এই useReducer hook initilaize করতে হবে আমাদের component এর মধ্যে, যেখানে আমরা useState hook ব্যবহার করতাম।
+
+```js copy {2} showLineNumbers
+const [tasks, setTasks] = useState(initialTasks);
+const [tasks, dispatch] = useReducer(tasksReducer, initialTasks);
+```
+
+উপরে useState এর পরিবর্তে useReducer initilaize করা হয়েছে। useState এর মধ্যে শুধুমাত্র initialState দিলেই ঐ state & state setter function rutrn করে থাকে। আর useReducer এর ক্ষেত্রে এটি initilaize করার জন্য প্রথম arg হিসেবে reducer function দিতে হবে, এরপরে ২য় arg হিসেবে initialState দিতে হবে, এটি state এবং dispatch function return করে। dispatch function এর মাধ্যমেই আমরা state update করার জন্য প্রয়োজনীয় data reducer function এর কাছে পাঠাবো।
+
+### reducer function write
+
+```js copy showLineNumbers
+function tasksReducer(tasks, action) {
+  switch (action.type) {
+    case "added": {
+      return [
+        ...tasks,
+        {
+          id: action.id,
+          text: action.text,
+          done: false,
+        },
+      ];
+    }
+    case "changed": {
+      return tasks.map((t) => {
+        if (t.id === action.task.id) {
+          return action.task;
+        } else {
+          return t;
+        }
+      });
+    }
+    case "deleted": {
+      return tasks.filter((t) => t.id !== action.id);
+    }
+    default: {
+      throw Error("Unknown action: " + action.type);
+    }
+  }
+}
+```
+
+উপরের reducer function invoke হবে যখন 
+
+</Steps>

@@ -1,0 +1,130 @@
+import { Callout, FileTree } from "nextra/components";
+
+## Read Doc
+
+<Callout type="info" emoji="">
+  Read all docs from the collection
+</Callout>
+
+`getDocs` এই function এর মাধ্যমে একটা collection এর সকল docs read করা যায়। `getDocs` function টিকে `collection()` / `doc()` দিয়ে কল করতে হবে। collection() শুধুমাত্র দুইটা arguments নিতে পারে, 1st arg হিসেবে fireStoreDatabase, 2nd arg হিসেবে firebase fireStore এর ডেটাবেস collection এর নাম দিতে হবে। আর doc() ৩টা arguments নিতে পারে; প্রথম ২টা collection() এর মতই, 3rd arg হিসেবে firebase fireStore এর doc id দেওয়া যায়।
+
+getDocs() database থেকে snapShots return করে থাকে। আমাদেরকে actual data পাওয়ার জন্য, সেই snapshot এর প্রতিটা Item এর উপরে data() method invoke করতে হবে; তাহলেই আমরা actual data পাবো। আর তাই নিচের উদাহরণে, forEach এর মাধ্যমে প্রতিটা data loop করে, actual data আলাদা একটা array তে push করে সেটাকে return করা হচ্ছে।
+
+```js copy showLineNumbers {1, 5, 19}
+// import
+import { collection, getDocs } from "firebase/firestore";
+import { fireStoreDatabase } from "./firebaseInitialize";
+
+// utility function
+export const findMany = async (DBName) => {
+  // get snapshot
+  const querySnapshot = await getDocs(collection(fireStoreDatabase, DBName));
+
+  // getting real data from snapshot
+  const data = [];
+  querySnapshot.forEach((doc) => {
+    data.push(doc.data());
+  });
+
+  return data;
+};
+
+// invoking
+const data = await findMany("users");
+```
+
+<Callout type="info" emoji="">
+  Read single doc by id from the collection
+</Callout>
+
+getDoc() database থেকে snapShots return করে থাকে। আমাদেরকে actual data পাওয়ার জন্য, সেই snapshot এর উপরে data() method invoke করতে হবে; তাহলেই আমরা actual data পাবো।
+
+```js copy showLineNumbers {1, 5, 14}
+// import
+import { doc, getDoc } from "firebase/firestore";
+import { fireStoreDatabase } from "./firebaseInitialize";
+
+// utility function
+export const findById = async (DBName, docId) => {
+  // get snapshot
+  const querySnapshot = await getDoc(doc(fireStoreDatabase, DBName, docId));
+
+  // return data
+  return querySnapshot.data();
+};
+
+// invoking
+const data = await findById("users", 1);
+```
+
+## Create Doc
+
+<Callout type="info" emoji="">
+  Create doc to the collection
+</Callout>
+
+setDoc() এর মাধ্যমে নতুন doc যুক্ত করা যাবে collection এর মধ্যে। যদি `manual id` দিয়ে doc add করতে চাই তাহলে আমাদেরকে doc() ব্যবহার করতে হবে, কেননা, collection() শুধুমাত্র ২টা arguments নিতে পারে। তাই নিচে আমরা চেক করতেছি, createDoc() এর মধ্যে 3rd arg দেওয়া হচ্ছে কিনা, যদি দেওয়া হয় তাহলে doc() method ব্যবহার করে manual id দিয়ে data যুক্ত হবে, নয়তো collection() এর মাধ্যমে `auth generated id` দিয়েই নতুন data যুক্ত হবে।
+
+```js copy showLineNumbers {1, 5, 15}
+// import
+import { doc, setDoc } from "firebase/firestore";
+import { fireStoreDatabase } from "./firebaseInitialize";
+
+// utility function
+export const createDoc = async (DBName, data, id = null) => {
+  // if have id, then setDoc by id. otherwise use auto generated id
+  if (id) {
+    await setDoc(doc(fireStoreDatabase, DBName, id), data);
+  } else {
+    await setDoc(collection(fireStoreDatabase, DBName), data);
+  }
+};
+
+// invoking
+await createDoc('users', {....}); // create by auto generated id
+await createDoc('users', {....}, 2); // create by manual generated id
+```
+
+## Delete Doc
+
+<Callout type="info" emoji="">
+  Delete single doc by id from the collection
+</Callout>
+
+`deleteDoc()` এই function এর মধ্যে `doc()` এর মাধ্যমে database, collection name, deletableId দিয়ে দিলেই delete হয়ে যাবে।
+
+```js copy showLineNumbers {1, 5, 10}
+// import
+import { doc, deleteDoc } from "firebase/firestore";
+import { fireStoreDatabase } from "./firebaseInitialize";
+
+// utility function
+export const deleteDocById = async (DBName, id) => {
+  await deleteDoc(doc(fireStoreDatabase, DBName, id));
+};
+
+// invoking
+await deleteDocById("users", 2);
+```
+
+## Update Doc
+
+<Callout type="info" emoji="">
+  Update doc by id in the collection
+</Callout>
+
+`updateDoc()` এই function এর মধ্যে `doc()` method দিয়ে যদি collection name, editable data id, updated data দিয়ে দিই, তাহলে update হয়ে যাবে।
+
+```js copy showLineNumbers {1, 5, 10}
+// import
+import { doc, updateDoc } from "firebase/firestore";
+import { fireStoreDatabase } from "./firebaseInitialize";
+
+// utility function
+export const updateDocById = async (DBName, id, data) => {
+  await updateDoc(doc(fireStoreDatabase, DBName, id), data);
+};
+
+// invoking
+await updateDocById('users', 2, {....})
+```
