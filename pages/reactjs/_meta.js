@@ -3,6 +3,7 @@ const reactRoute = {
   "pre-requisites": "Pre Requisites",
   installation: "Installation",
   fundamental: "Fundamental Concepts",
-  "state-management": "State Management"
+  "state-management": "State Management",
+  hooks: "React Hooks",
 };
 export default reactRoute;
