@@ -1,0 +1,296 @@
+import { Steps } from "nextra/components";
+
+## useEffect hook কেন ব্যবহার করতে হবে?
+
+যদি react এর গন্ডির বাইরে গিয়ে কোন কাজ করার প্রয়োজন হয়, তখন আমাদেরকে `useEffect` hook ব্যবহার করতে হয়। যেমনঃ server api call, browser api use এছাড়াও এমন কোন কাজ যেটা react এর ২টা working phase (render & commit) এর পরে সম্পাদন করা প্রয়োজন। অর্থাৎ, screen এ dom elements load হওয়ার পরে যদি কোন কাজ করতে চাই তখনও `useEffect` ব্যবহারিত হয়।
+
+## How to write an Effect
+
+<Steps>
+### Declare an effect 
+প্রথমে react package থেকে `useEffect` hook named import করে নিতে হবে।
+
+```js copy
+import { useEffect } from "react";
+```
+
+### Initilaize hook in component
+
+এরপরে hook টি component এর top level এ Initilaize করতে হবে। react এর কোন hook condition কিংবা jsx এর মধ্যে ব্যবহার করা যায়না, সবসময় component এর jsx return এর উপরে ব্যবহার করতে হবে।
+
+```js copy showLineNumbers {2-4}
+function MyComponent() {
+  useEffect(() => {
+    // Code here will run after *every* render
+  });
+  return <div />;
+}
+```
+
+### Specify the Effect dependencies
+
+আগের স্টেপে যে `useEffect` hook Initilaize করা হয়েছে সেটি প্রতিটি render এ run করবে। কিন্তু, এটি সবসময় আমাদের উদ্দেশ্য হবে না। আমাদেরকে নির্দিষ্টভাবে বলার প্রয়োজন হবে কখন কখন `useEffect` execute হবে। সেজন্য আমরা dependencies দিয়ে দিতে পারি, আর এই dependencies এর এক বা একাধিক কোন কিছু পরিবর্তন হলেই `useEffect` run করবে।
+
+নিচের কোডে দেখানো হয়ছে, myState এর পরিবর্তনের কারণে আমরা চাই `useEffect` hook আবার run করুক। তাই `useEffect` এর 2nd argument এ `myState` টা দিয়ে দেওয়া হয়েছে। ফলে, প্রথমে একবার useEffect run করবে DOM Commit হবার পরে, এরপর থেকে myState এ কোন পরিবর্তন হলেই useEffect run করবে।
+
+```js copy showLineNumbers {2, 6}
+function MyComponent() {
+  const [myState, setMyState] = useState("");
+
+  useEffect(() => {
+    // Code here will run after *every* render
+  }, [myState]);
+
+  return <div />;
+}
+```
+
+### Add cleanup if needed
+
+`useEffect` hook এর মাধ্যমে আমরা যেভাবে বিভিন্ন third-party api & event listen করে থাকি সেগুলো component unmount হওয়ার সময় remove করে দেওয়ার প্রয়োজন হয়। কেননা, component unmount হওয়ার পরেও যদি listner active থাকে applicaton unexpected result দিতে পারে, এছাড়াও unnecessary code running থাকার জন্য application performance slow হয়ে যেতে পারে। তাই, আমরা কোন component unmount এর সময় ঐ সকল listner remove করে দিতে পারি।
+
+`example1` এ আমরা একটি cleanup function ব্যবহার করেছি। cleanup function মূলত একটি callback function যেটি `useEffect` hook এর মধ্যে দিয়ে দিতে হবে। যখন component unmount হবে, শুধুমাত্র তখনই ঐ `return` এর মধ্যকার function run করবে।
+
+`example2` তে `useEffect` এর মাধ্যমে যুক্ত করা window event cleanup করা হয়েছে।
+
+```js copy showLineNumbers {6-8} filename="example1"
+import createConnection from "../connection";
+useEffect(() => {
+  const connection = createConnection();
+  connection.connect();
+
+  // cleanup function
+  return () => {
+    connection.diconnect();
+  };
+});
+```
+
+```js copy showLineNumbers filename="example2" {8}
+useEffect(() => {
+  function handleScroll(e) {
+    console.log(window.scrollX, window.scrollY);
+  }
+
+  window.addEventListener("scroll", handleScroll);
+
+  return () => window.removeEventListener("scroll", handleScroll);
+}, []);
+```
+
+</Steps>
+
+## Fetching data
+
+Data fetch করা যেহেতু third-party api থেকে করা হয়ে থাকে, তাই এটি একটি sideEffect, এই sideEffect handle করার জন্য useEffect ব্যবহার করতে হয়।
+
+`simpleExample` এ আমরা দেখতে পারছি fetchTodos function এর মাধ্যমে todo fetch করে todos state এর মধ্যে set করে দেওয়া হচ্ছে। এটি production mode এ ঠিকভাবে কাজ করবে। কিন্তু development mode এ যেহেতু `React.strictMode` এর জন্য component ২বার করে render হয়ে থাকে, তাই unexpected result আসতে পারে, যদি api থেকে random data fetch করা হয়ে থাকে। কেননা, সব component screen এ দেখানোর সাথে সাথেই useEffect execute হয়ে todos state update হয়ে যাবে, আর এটি আপডেট হওয়ার সাথে সাথে react unmount করে আবার mount করে দিবে, তখন useEffect আরেকবা execute হয়ে state update করে ফেলবে। তাই, development mode এও যদি আমরা এটা protect করতে চাই তাহলে professionalExample টি দেখতে হবে।
+
+`professionalExample` এখানে আমরা ৩ নম্বর লাইনে একটি variable নিয়েছি, এই variable এর value যখন false থাকবে শুধুমাত্র তখনই state update হবে। আর cleanup এর মধ্যে আমরা ignore variable এর value true করে দিচ্ছি। যখন প্রথমে useEffect run হচ্ছে, তখন server থেকে fetchTodos asyncronous function টি execution এ দিয়ে নতুন লাইনে চলে যাচ্ছে, fetchTodos complete হওয়ার পরেই 9 নম্বর লাইনে setTodos এর মাধ্যমে state update হবে। কিন্তু এখানে fetchTodos এর response আসার আগেই useEffect এর cleanup করে আবার re-mount করে দিচ্ছে। সেজন্য, যখন fetchTodos এর response আসবে, ততক্ষণে ignore টি true হয়ে গেছে, আর তাই ৮ নম্বর লাইনের ওখানে এসে আর ভিতরে ধুকবে না। পরে যখন re-mount হবে তখন আর cleanup হবে না, তাই ঠিক ২য় বারে গিয়ে শুধুমাত্র একবারই state টা update হবে। এভাবেই development mode এ আমরা useEffect এর মাধ্যমে state update সঠিকভাবে করতে পারবো।
+
+```js copy showLineNumbers {6} filename="simpleExample"
+const [todos, setTodos] = useState({});
+useEffect(() => {
+  async function startFetching() {
+    const json = await fetchTodos(userId);
+
+    setTodos(json);
+  }
+
+  startFetching();
+}, [userId]);
+```
+
+```js copy showLineNumbers {3, 8-11, 15-17} filename="professionalExample"
+const [todos, setTodos] = useState({});
+useEffect(() => {
+  let ignore = false;
+
+  async function startFetching() {
+    const json = await fetchTodos(userId);
+
+    if (!ignore) {
+      setTodos(json);
+    }
+  }
+  startFetching();
+
+  // cleanup
+  return () => {
+    ignore = true;
+  };
+}, [userId]);
+```
+
+## Sending analytics
+
+বিভিন্ন ধরনের analytics data server এ পাঠানোর জন্য useEffect ব্যবহার করা হয়ে থাকে। যেমনঃ কোন পেজে কতজন ভিজিটর আছে, পেজ ভিজিটর count google analytics এর কাছে পাঠানো ইত্যাদি ক্ষেত্রে ব্যবহার হয়ে থাকে।
+
+```js copy showLineNumbers
+useEffect(() => {
+  logVisit(url); // Sends a POST request
+}, [url]);
+```
+
+## Remove unnecessary Effects
+
+useEffect জানার ফলে কোন state update কিংবা event handle এর জন্য useEffect এর unnecessary use হয়ে যেতে পারে নিজের অজান্তেই, তাই কখন কখন useEffect এর প্রয়োজন নেই সেগুলোই জানবোঃ
+
+### Updating state based on props or state
+
+কোন state কে যদি অন্য state বা props এর data দিয়ে update করি সেটা একটি ভুল পদ্ধতি। আমরা চাইলে এক্ষেত্রে useEffect বাদ দিয়ে, calculated / derived state দিয়ে কাজটি করে ফেলতে পারি।
+
+```js showLineNumbers filename="wrongExample" {5-10}
+function Form() {
+  const [firstName, setFirstName] = useState("Taylor");
+  const [lastName, setLastName] = useState("Swift");
+
+  // 🔴 Avoid: redundant state and unnecessary Effect
+  const [fullName, setFullName] = useState("");
+  useEffect(() => {
+    setFullName(firstName + " " + lastName);
+  }, [firstName, lastName]);
+  // ...
+}
+```
+
+```js copy showLineNumbers filename="correctExample" {6}
+function Form() {
+  const [firstName, setFirstName] = useState("Taylor");
+  const [lastName, setLastName] = useState("Swift");
+
+  // ✅ Good: calculated during rendering
+  const fullName = firstName + " " + lastName;
+  // ...
+}
+```
+
+### Resetting all state when a prop changes
+
+parent component থেকে props এর মাধ্যমে পাওয়া data এর উপরে ভিত্তি করে যদি child component এর মধ্যকার কোন state reset করার প্রয়োজন হয়, সেক্ষেত্রে useEffect ব্যবহার করা ভুল পদ্ধতি। এক্ষেত্রে আমরা parent component থেকে child component এ `key` দিয়ে দিতে পারি।
+
+```js copy showLineNumbers filename="wrongExample" {5-7}
+export default function ProfilePage({ userId }) {
+  const [comment, setComment] = useState("");
+
+  // 🔴 Avoid: Resetting state on prop change in an Effect
+  useEffect(() => {
+    setComment("");
+  }, [userId]);
+  // ...
+}
+```
+
+```js copy showLineNumbers filename="correctExample" {5}
+export default function ProfilePage({ userId }) {
+  return <Profile userId={userId} key={userId} />;
+}
+
+function Profile({ userId }) {
+  // ✅ This and any other state below will reset on key change automatically
+  const [comment, setComment] = useState("");
+  // ...
+}
+```
+
+### Sharing logic between event handlers
+
+একাধিক logic handlers এর মধ্যে একই code use না করার জন্য অনেক সময় useEffect এর মাধ্যমে handle করা চিন্তা মাথায় আসতেই পারে। কিন্তু এটি করা যাবে না।
+
+`wrongExample` এর মধ্যে দেখা যাচ্ছে product যদি cart এ থাকে তাহলে showNotification function execute হবে। user যখন cart এ add করবে তখন সঠিকভাবেই showNotification কাজ করবে। কিন্তু, যখন cart এ product add হয়ে যাবে, তখন server এ ডেটা save হয়ে যাবে, আর save হয়ে গেলে পরবর্তীতে user যখনই আবার application open করবে তখনই showNotification execute হবে, কেননা, user already product cart এ add করে রেখেছে।
+
+`correctExample` এর মধ্যে দেখা যাচ্ছে একটি buyProduct() নামে function নেওয়া হয়েছে, যেটি product cart এ add করে showNotification করে। এটি add to cart এর ক্ষেত্রে ঠিক আছে। কিন্তু checkout এর ক্ষেত্রে product cart এ add করে showNotification করতে হবে এবং অন্য url এ navigate করতে হবে।
+
+```js copy showLineNumbers filename="wrongExample" {3-7}
+function ProductPage({ product, addToCart }) {
+  // 🔴 Avoid: Event-specific logic inside an Effect
+  useEffect(() => {
+    if (product.isInCart) {
+      showNotification(`Added ${product.name} to the shopping cart!`);
+    }
+  }, [product]);
+
+  function handleBuyClick() {
+    addToCart(product);
+  }
+
+  function handleCheckoutClick() {
+    addToCart(product);
+    navigateTo("/checkout");
+  }
+  // ...
+}
+```
+
+```js copy showLineNumbers filename="correctExample" {2-6,9,13}
+function ProductPage({ product, addToCart }) {
+  // ✅ Good: Event-specific logic is called from event handlers
+  function buyProduct() {
+    addToCart(product);
+    showNotification(`Added ${product.name} to the shopping cart!`);
+  }
+
+  function handleBuyClick() {
+    buyProduct();
+  }
+
+  function handleCheckoutClick() {
+    buyProduct();
+    navigateTo("/checkout");
+  }
+  // ...
+}
+```
+
+## Lifecycle of useEffect
+
+Lifecycle হচ্ছে জীবনচক্র। ReactJS এর মধ্যে কোন কিছুর Lifecycle বলতে সেটি কখন কিভাবে তৈরি হয় আর কিভাবে আপডেট কিংবা ধ্বংস হয়। Component আর useEffect এর Lifecycle ভিন্ন।
+
+useEffect এর মধ্যে ২টা অংশ থাকে। একটা হচ্ছে syncronizer অন্যটা cleanup function. যখন কোন component mount হয় তখন syncronizer অংশ execute হয়ে থাকে, আর যখন unmount হয় তখন cleanup function execute হয়ে থাকে। যখন component re-render হয়, তখন আগেই useEffect execute হয়না, প্রথমে jsx update হবে, এরপরে useEffect দেখবে তার dependency এর কোন value পরিবর্তন হয়েছে কিনা, যদি পরিবর্তন হয়; তাহলে cleanup function execute হবে, তারপরে syncronizer function execute হবে।
+
+```js copy showLineNumbers {6-15}
+import { useState, useEffect } from "react";
+import { createConnection } from "./chat.js";
+
+const serverUrl = "https://localhost:1234";
+
+function ChatRoom({ roomId }) {
+  useEffect(() => {
+    const connection = createConnection(serverUrl, roomId);
+    connection.connect();
+
+    return () => connection.disconnect();
+  }, [roomId]);
+
+  return <h1>Welcome to the {roomId} room!</h1>;
+}
+
+export default function App() {
+  const [roomId, setRoomId] = useState("general");
+  const [show, setShow] = useState(false);
+  return (
+    <>
+      <label>
+        Choose the chat room:{" "}
+        <select value={roomId} onChange={(e) => setRoomId(e.target.value)}>
+          <option value="general">general</option>
+          <option value="travel">travel</option>
+          <option value="music">music</option>
+        </select>
+      </label>
+      <button onClick={() => setShow(!show)}>
+        {show ? "Close chat" : "Open chat"}
+      </button>
+      {show && <hr />}
+      {show && <ChatRoom roomId={roomId} />}
+    </>
+  );
+}
+```
+
+## Separating Events from Effects
+
+
+```js copy showLineNumbers filename="wrongExample" {}
+
+```

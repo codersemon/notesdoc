@@ -1,0 +1,53 @@
+## useExternalSyncStorage পরিচিতি
+
+ধরেন একটা চ্যাট অ্যাপ আছে। এই অ্যাপকে জানতে হবে যে ইন্টারনেট সংযোগ আছে কি না। এই তথ্যটা ব্রাউজার থেকে পাওয়া যায়।
+
+*আগে কী করা হতো:*
+
+আগে এই ধরনের কাজ করার জন্য useEffect নামে একটা জিনিস ব্যবহার করা হত। কিন্তু এই পদ্ধতিটি একটু জটিল।
+
+এখন useSyncExternalStore কেন ব্যবহার করা হয়:
+
+- সহজ: এইটা ব্যবহার করলে কাজটা অনেক সহজ হয়ে যায়। অনেক কোড লিখতে হবে না।
+- দ্রুত: এই পদ্ধতিটা অনেক দ্রুত। অ্যাপ্লিকেশন আরো ফাস্ট চলবে।
+- সঠিক: এই পদ্ধতিটা নিশ্চিত করে যে অ্যাপ্লিকেশন সবসময় সঠিক তথ্য দেখাবে।
+
+### এটা কী কিভাবে কাজ করে:
+
+এটা ব্রাউজারের সাথে যোগাযোগ করে এবং ব্রাউজার থেকে তথ্য নিয়ে আসে। যখনই ইন্টারনেট সংযোগের অবস্থা পরিবর্তিত হয়, তখন এই হুকটা তোমার অ্যাপ্লিকেশনকে তা জানিয়ে দেয়।
+
+সহজ কথায়:
+
+useSyncExternalStore হলো একটা টুল যা অ্যাপ্লিকেশনকে বাইরের তথ্যের সাথে সংযুক্ত করে রাখে। এটা যেন একটা দরজা, যার মাধ্যমে তোমার অ্যাপ্লিকেশন বাইরের জগতের সাথে কথা বলতে পারে।
+
+উদাহরণ:
+
+ধরেন একটা ওয়েবসাইট আছে যেখানে তাপমাত্রা দেখানো হয়। এই তথ্যটা আপনি কোনো ওয়েবসাইট থেকে নিতে চান। useSyncExternalStore ব্যবহার করে এই ওয়েবসাইট থেকে তথ্য নিতে পারবে্ন এবং আপনার ওয়েবসাইটে তা দেখাতে পারবেন।
+
+useExternalSyncStorage এটি মোট ৩টি arguments নিয়ে থাকে। 1st arg এ subscribe & cleanup করার জন্য একটি function দিয়ে হবে, এটি সাধারণত subscribe নামেই পরিচিত, তবে যেকোন নামে নেওয়া যাবে। এই subscribe function টি একটি arugment এর মাধ্যমে initial/server value নিবে যেটি 3rd argument থেকে পাবে। আর 2nd argument টিতে একটি callback function এর দিতে হবে, যেটার মাধ্যমেই subscribe করার event এর value পাওয়া যাবে। 
+
+```js copy showLineNumbers {1-8, 10-17}
+function subscribe(callback) {
+  window.addEventListener('online', callback);
+  window.addEventListener('offline', callback);
+  return () => {
+    window.removeEventListener('online', callback);
+    window.removeEventListener('offline', callback);
+  };
+}
+
+function useOnlineStatus() {
+  // ✅ Good: Subscribing to an external store with a built-in Hook
+  return useSyncExternalStore(
+    subscribe, // React won't resubscribe for as long as you pass the same function
+    () => navigator.onLine, // How to get the value on the client
+    () => true // How to get the value on the server
+  );
+}
+
+function ChatIndicator() {
+  const isOnline = useOnlineStatus();
+  // ...
+}
+```
+

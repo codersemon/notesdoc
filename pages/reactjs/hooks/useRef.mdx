@@ -1,4 +1,4 @@
-## useRef Hook 
+## useRef Hook
 
 React-এ `useRef` একটি হুক যা সাধারণত DOM এলিমেন্ট বা পরিবর্তনশীলের রেফারেন্স ধরে রাখতে ব্যবহৃত হয়। এটি মূলত React উপাদানগুলির মধ্যে মান ধরে রাখতে সাহায্য করে যা পুনরায় রেন্ডার হওয়ার পরে পরিবর্তিত হয় না।
 
@@ -11,11 +11,288 @@ React-এ `useRef` একটি হুক যা সাধারণত DOM এ�
 
 ### useRef এবং useState এর মধ্যে পার্থক্য
 
-| বৈশিষ্ট্য               | `useRef`                                       | `useState`                                 |
-|------------------------|-----------------------------------------------|--------------------------------------------|
-| **রেন্ডারিং ট্রিগারিং** | মান পরিবর্তন করলে কম্পোনেন্ট পুনরায় রেন্ডার হয় না | মান পরিবর্তন করলে কম্পোনেন্ট পুনরায় রেন্ডার হয় |
-| **মূল ব্যবহার**         | DOM রেফারেন্স বা mutable ডেটা ধরে রাখা       | কম্পোনেন্টের স্টেট পরিচালনা করা            |
-| **মান ধরার ধরণ**       | `.current` প্রপার্টির মাধ্যমে অ্যাক্সেস      | সরাসরি মান অ্যাক্সেস করা যায়              |
-| **আলোচনা**             | পারফরম্যান্স উন্নত করে এবং রেন্ডারিং সাইকেল থেকে আলাদা থাকে | রেন্ডারিং সাইকেলের সঙ্গে যুক্ত            |
+| বৈশিষ্ট্য               | `useRef`                                                    | `useState`                                       |
+| ----------------------- | ----------------------------------------------------------- | ------------------------------------------------ |
+| **রেন্ডারিং ট্রিগারিং** | মান পরিবর্তন করলে কম্পোনেন্ট পুনরায় রেন্ডার হয় না         | মান পরিবর্তন করলে কম্পোনেন্ট পুনরায় রেন্ডার হয় |
+| **মূল ব্যবহার**         | DOM রেফারেন্স বা mutable ডেটা ধরে রাখা                      | কম্পোনেন্টের স্টেট পরিচালনা করা                  |
+| **মান ধরার ধরণ**        | `.current` প্রপার্টির মাধ্যমে অ্যাক্সেস                     | সরাসরি মান অ্যাক্সেস করা যায়                     |
+| **আলোচনা**              | পারফরম্যান্স উন্নত করে এবং রেন্ডারিং সাইকেল থেকে আলাদা থাকে | রেন্ডারিং সাইকেলের সঙ্গে যুক্ত                   |
 
 > **উদাহরণস্বরূপ:** আপনি যদি একটি ইনপুট ফিল্ডে ফোকাস আনতে চান, `useRef` ব্যবহার করা হবে, কিন্তু যদি আপনি একটি কাউন্টার বাড়াতে চান যা প্রতিবার ক্লিক করলে UI আপডেট হবে, তাহলে `useState` ব্যবহার করবেন।
+
+## useRef for dynamic node
+
+যখন আমাদেরকে dynamically ref use করতে হবে, তখন আমাদেরকে node এর মাধ্যমে সেটা ব্যবহার করতে হবে।
+
+```js copy filename="CatsFriend.jsx"
+// dependencies
+import { useRef, useState } from "react";
+
+const CatsFriend = () => {
+  const [cats, setCats] = useState(getCatList());
+  const catsRef = useRef(null);
+
+  // get map function
+  const getMap = () => {
+    if (!catsRef.current) {
+      catsRef.current = new Map();
+    }
+    return catsRef.current;
+  };
+
+  // handle showing cats
+  const handleShowIntoView = (id) => {
+    const targetNode = catsRef.current.get(id);
+    targetNode.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+      inline: "center",
+    });
+  };
+
+  return (
+    <div style={{ width: "70%", margin: "50px auto" }}>
+      <nav>
+        <ul style={styles.navList}>
+          {cats?.map((item) => (
+            <li
+              style={styles.button}
+              key={item?.id}
+              onClick={() => handleShowIntoView(item?.id)}
+            >
+              Cat {item?.id}
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <div style={styles.wrapper}>
+        <ul style={styles.list}>
+          {cats?.map((item) => (
+            <li
+              key={item?.id}
+              style={styles.items}
+              ref={(node) => {
+                const map = getMap();
+
+                if (node) {
+                  map.set(item.id, node);
+                } else {
+                  map.delete(item.id);
+                }
+              }}
+            >
+              <img src={item?.img} alt="" />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+export default CatsFriend;
+
+const getCatList = () => {
+  const data = [];
+  Array(10)
+    .fill(0)
+    .map((item, index) => {
+      data.push({
+        id: index,
+        img: `https://loremflickr.com/420/240/cat?lock=${index}`,
+      });
+    });
+  return data;
+};
+
+const styles = {
+  wrapper: {
+    overflow: "hidden",
+  },
+  list: {
+    listStyle: "none",
+    whiteSpace: "nowrap",
+  },
+  items: {
+    paddingInline: "10px",
+    display: "inline",
+  },
+  textCenter: {
+    textAlign: "center",
+  },
+  button: {
+    display: "inline",
+    padding: "10px 20px",
+    background: "#dcdcdc",
+    margin: "5px",
+    borderRadius: "5px",
+    cursor: "pointer",
+  },
+  navList: {
+    listStyle: "none",
+    textAlign: "center",
+    marginBottom: "20px",
+  },
+};
+```
+
+## forwardRef এর ব্যবহার
+
+একটা component থেকে অন্য componet এর মধ্যে ref props দিয়ে useRef hook ব্যবহার করার জন্য forwardRef function ব্যবহার করতে হবে। কেননা, `ref` props অন্যান্য সাধারণ props থেকে আলাদা। এটি সরাসরি handle করা যায় না। তাই যে component এর মধ্যে `ref` pass করতে চাই, সেই component টিকে `forwardRef` এর মধ্যে মুড়িয়ে return করতে হবে।
+
+```js copy filename="Form.jsx" showLineNumbers {15}
+import { useEffect, useRef, useState } from "react";
+import CustomInput from "./CustomInput";
+
+const Timer = () => {
+  const [targetTime, setTargetTime] = useState("");
+
+  // input ref
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    inputRef.current.focus();
+  }, []);
+
+  return (
+    <CustomInput
+      ref={inputRef}
+      type="number"
+      placeholder="type minutes"
+      value={targetTime}
+      onChange={(e) => setTargetTime(e.target.value)}
+    />
+  );
+};
+
+export default Timer;
+```
+
+নিচের ফাইলে দেখা যাচ্ছে input component কে `forwardRef` এর মধ্যে callback হিসেবে দেওয়া হয়েছে। forwardRef এর 1st argument এর মধ্যে সকল props আর 2nd arguement এর মধ্যে ref প্যা যায়।
+
+```js copy filename="CustomInput.jsx" showLineNumbers {4}
+/* eslint-disable react/display-name */
+import { forwardRef } from "react";
+
+const CustomInput = forwardRef((props, ref) => {
+  return <input {...props} ref={ref} />;
+});
+
+export default CustomInput;
+```
+
+## useImperativeHandle hook এর ব্যবহার
+
+আগের সেকশনে `forwardRef` method এর মাধ্যমে parent component থেকে child component এর মধ্যে `useRef` hook এর `ref` props pass করতে পারছিলাম। এর ফলে child component এর manupulation control parent component এর কাছে চলে গিয়েছিল। কিন্তু, আমরা যদি child component থেকে control করতে চাই parent component এর থেকে child component node এর মধ্যে কি কি করা সম্ভব হবে, তখনই আমাদেরকে `useImperativeHandle` hook ব্যবহার করতে হবে। এই hook টি parent compnent থেকে পাওয়া `ref` কে 1st arg এবং 2nd arg এর মধ্যে একটি callback function এর মাধ্যমে locally define করা `useRef` hook এর current property modify করার জন্য functions define করে দিতে হবে। এই function parent component থেকে acces করা যাবে। এর বাইরে অন্য কোন method apply করা যাবে না parent থেকে।
+
+```js copy filename="CustomInput.jsx" showLineNumbers {6, 9-15}
+/* eslint-disable react/display-name */
+import { forwardRef, useImperativeHandle, useRef } from "react";
+
+const CustomInput = forwardRef((props, ref) => {
+  // local input ref
+  const localRef = useRef(null);
+
+  // control parent ref capability
+  useImperativeHandle(ref, () => ({
+    focus() {
+      localRef.current.focus();
+    },
+  }));
+
+  return <input {...props} ref={localRef} />;
+});
+
+export default CustomInput;
+```
+
+## flushSync এর ব্যবহার (update state syncronously)
+
+আমরা জানি যখন `useState` hook এর setter function দিয়ে state update করা হয়, সেই আপডেটেড state এর ভেলু সাথে সাথেই পাওয়া যায় না। updated state এর value রেন্ডার হবার পরে পাওয়া যায়। কিন্তু নিচের উদাহরণে আমরা দেখতে পাবো যে যখন state এর মধ্যে new ডেটা দিয়ে update করা হচ্ছে তখন আমাদেরকে ঐ new data পর্যন্ত scrollIntoView করে নিতে পারছে না।
+
+```js copy filename="TaskList.jsx" showLineNumbers {11-15}
+import { useRef, useState } from "react";
+
+export default function TodoList() {
+  const listRef = useRef(null);
+  const [text, setText] = useState("");
+  const [todos, setTodos] = useState(initialTodos);
+
+  function handleAdd() {
+    const newTodo = { id: nextId++, text: text };
+    setText("");
+    setTodos([...todos, newTodo]);
+    listRef.current.lastChild.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+    });
+  }
+
+  return (
+    <>
+      <button onClick={handleAdd}>Add</button>
+      <input value={text} onChange={(e) => setText(e.target.value)} />
+      <ul ref={listRef}>
+        {todos.map((todo) => (
+          <li key={todo.id}>{todo.text}</li>
+        ))}
+      </ul>
+    </>
+  );
+}
+
+let nextId = 0;
+let initialTodos = [];
+for (let i = 0; i < 20; i++) {
+  initialTodos.push({
+    id: nextId++,
+    text: "Todo #" + (i + 1),
+  });
+}
+```
+
+উপরের ঐ সমস্যা সমাধান করার জন্য আমাদেরকে `flushSync` method এর মধ্যে callback হিসেবে একটা function নিয়ে সেখানে state update করতে হবে। তাহলে state আপডেট হবার পরেই DOM manupulation করার যাবে state এর value দিয়েই। কেননা, `flushSync` এটি syncronously state আপডেট করে থাকে। আর এই flushSync method `react-dom` package থেকে পাওয়া যায়।
+
+```js copy filename="TaskList.jsx" showLineNumbers {2, 12-14}
+import { useRef, useState } from "react";
+import { flushSync } from "react-dom";
+
+export default function TodoList() {
+  const listRef = useRef(null);
+  const [text, setText] = useState("");
+  const [todos, setTodos] = useState(initialTodos);
+
+  function handleAdd() {
+    const newTodo = { id: nextId++, text: text };
+    setText("");
+    flushSync(() => {
+      setTodos([...todos, newTodo]);
+    });
+    listRef.current.lastChild.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+    });
+  }
+
+  return (
+    <>
+      <button onClick={handleAdd}>Add</button>
+      <input value={text} onChange={(e) => setText(e.target.value)} />
+      <ul ref={listRef}>
+        {todos.map((todo) => (
+          <li key={todo.id}>{todo.text}</li>
+        ))}
+      </ul>
+    </>
+  );
+}
+
+let nextId = 0;
+let initialTodos = [];
+for (let i = 0; i < 20; i++) {
+  initialTodos.push({
+    id: nextId++,
+    text: "Todo #" + (i + 1),
+  });
+}
+```
