@@ -1,4 +1,4 @@
-import { Steps } from "nextra/components";
+import { Callout, Steps } from "nextra/components";
 
 ## useEffect hook কেন ব্যবহার করতে হবে?
 
@@ -290,7 +290,47 @@ export default function App() {
 
 ## Separating Events from Effects
 
+`Effect` & `Event` দুইটা আলাদা জিনিস। Effect হচ্ছে যেটি automatically হতে হবে, আর Event হচ্ছে যেটি user এর interaction এর জন্য সংঘটিত হতে হবে। যেটি automatically হওয়া উচিত সেটা user এর কোন event এর জন্য যেমন run করানো যাবে না, ঠিক তেমন যেটি user এর interaction জন্য হওয়া উচিত সেটি automatically সংঘটিত করা যাবে না।
 
-```js copy showLineNumbers filename="wrongExample" {}
+উদাহরণঃ user যখন application এর মধ্যে আসবে সাথে সাথে Server থেকে চেক করতে হবে user logged-in কিনা, এটা user এর কোন interaction উপর নির্ভর করা যাবে না। আবার, একটি ফরম submit করবে user এর interaction এর জন্য, কিন্তু সেটা যদি automatically হয়; তাহলে সমস্যার সৃষ্টি হবে।
 
+## Removing Effect Dependencies
+
+আমরা ইতিমধ্যে জেনেছি যে Effect dependencies খুবই গুরুত্বপূর্ণ; কেননা, এই dependencies এর উপর নির্ভর করেই useEffect hook re-syncronize করে থাকে। useEffect এর মধ্যে যতগুলো reactive value use করা হবে, সবগুলোই dependency তে দিতে হবে, নয়তো আমাদের expected syncronization হবে না। আবার অপরদিকে যদি আমরা অপ্রয়োজনীয় dependencies দিয়ে দিই সেক্ষেত্রেও আবার component অপ্রয়োজনীয় re-render বা infinite loop এর মধ্যে পড়ে যেতে পারে।
+
+<Callout type="warning" emoji="⚠">
+  যেসকল dependency linter এর মাধ্যমে suggest করছে ব্যবহার করার জন্য, সেগুলো
+  কোনভাবেই supress করা যাবে না, এতে unexpected error আসতে পারে আর debugging অনেক
+  কঠিন হয়ে যাবে। dependency supress করার পরিবর্তে আমাদের কোডে পরিবর্তন এনে
+  linter কে প্রমাণ দিতে হবে যে এটি আমাদের dependency তে ব্যবহার করার প্রয়োজন
+  নেই।
+</Callout>
+
+#### ❌ যেগুলো dependency তে না দেওয়ার চেষ্টা করতে হবেঃ
+
+- কোন functions হতে পারে সেটা updater কিংবা অন্য কোন functions যেটা props এর মাধ্যমে আসছে। যদি কোন state updater function useEffect এর মধ্যে ব্যবহার করার প্রয়োজন হয়, তখন আমাদেরকে নিচের পদ্ধতিতে update করতে হবে, তাহলে dependency তে দেওয়া লাগবে না। আর যদি props থেকে আসে সেক্ষেত্রে useEffectEvent এর মধ্যে মুড়িয়ে ব্যবহার করতে হবে। useEffectEvent যেহেতু এখনো production mode এ আসে নাই, তাই যখন আসবে তখন সেটি এখানে যুক্ত করা হবে।
+
+```js copy showLineNumbers {4}
+const [state, setState] = useState([{...}]);
+
+useEffect(() => {
+  setState((prev) => ([...prev, {...}]) )
+}, [])
+```
+
+- কোন object কে dependency তে দেওয়া যাবে না। যদি object এর মধ্যকার reactive value useEffect এর মধ্যে ব্যবহার করার প্রয়োজন হয়, তাহলে সেটি destructure করে নিতে হবে।
+
+```js copy showLineNumbers {6, 11, 12}
+const [state, setState] = useState([{...}]);
+const object = {
+  name: "hello",
+  age: 50
+}
+const {name, age} = object;
+
+useEffect(() => {
+  setState((prev) => ([...prev, {...}]) )
+
+  getUser(name, age);
+}, [name, age])
 ```
