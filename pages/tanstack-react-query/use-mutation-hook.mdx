@@ -1,0 +1,84 @@
+import { Steps } from "nextra/components";
+
+## useMutation Hook
+
+এই hook দিয়ে server API request করে post, update, patch ইত্যাদি করা যায়।
+
+## useMutation Hook এর ব্যবহার
+
+<Steps>
+  ### Step 1 
+  
+  প্রথমে `@tanstack/react-query` package থেকে `useMutation` hook
+  named import করে নিতে হবে। এরপরে একটি variable এর মধ্যে `useMutation` initiate
+  করতে হবে। `useMutation` এর মধ্যে option দেওয়ার জন্য object pass করতে হবে। যে
+  object এর মধ্যে mutationFn নামে একটি key দিতে হবে, যেখানে আমরা callback এর
+  মধ্যে data pass করে api তে send করতে পারি।
+
+```js copy showLineNumbers {1, 4-8}
+import { useMutation } from "@tanstack/react-query";
+
+const ProductAddEdit = () => {
+    const mutation = useMutation({
+        mutationFn: (productData) => {
+        return API.post("/products", productData);
+        },
+    });
+
+    // rest code to return jsx
+    return ()
+}
+```
+
+### Step 2 & Final Step
+
+`useMutation` hook অনেক ধরনের state & data & method return করে। প্রথম স্টেপে যে callbackFunction ব্যবহার করেছি, সেটা একটি data argument expect করে, যেটা আমরা form submission এর সময় provide করবো। আগের স্টেপে আমরা `useMutation` hook এর সব state, data, method `mutation variable` এর মধ্যে receive করা হয়েছে। এই mutation থেকে mutate method এর মধ্যে data দিয়ে দিলেই সেটি mutationFn এর parameter -এ চলে যাবে।
+
+```js copy showLineNumbers {6}
+// handle submit
+const handleFormSubmit = (e) => {
+  e.preventDefault();
+
+  //save product data to db
+  mutation.mutate(data);
+};
+```
+
+</Steps>
+
+## Options
+
+### onSuccess
+
+`useMutation` hook ব্যবহার এর ২য় স্টেপেই আমাদের ডেটাবেসে data চলে গেছে। কিন্তু, আমাদের UI টা অটোমেটিক updated data show করবে না। কেননা, reactQuery cache থেকে UI তে data show করে থাকে। আমরা যদি চাই database update হবার সাথে সাথে আগের cache invalidate হয়ে নতুন cache তৈরি করে নিতে, তাহলে `useQueryClient` hook ব্যবহার করতে হবে।
+
+প্রথমে `useQueryClient` hook একটা variable এর মধ্যে initiate করতে হবে। এখানে instance বানানোর প্রয়োজন নেই main.jsx file এর মত। শুধুমাত্র variable এর মধ্যে initiate করলেই হয়ে যাবে।
+
+queryClient এর মধ্যে সব cache করা ডেটার key আছে। আমরা যেহেতু `products` key এর মধ্যে products এর সব ডেটা ক্যাশ করতেছিলাম, তাই এই key এর মাধ্যমেই `invalidateQueries` এর মধ্যে queryKey দিলেই cache clear হয়ে যাবে আর Database থেকে নতুন data এনে দেখাবে।
+
+```js copy showLineNumbers {1, 6, 12-14}
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import API from "../utils/axios";
+
+const ProductAddEdit = () => {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: (productData) => {
+      return API.post("/products", productData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["products"]);
+    },
+  });
+
+  // rest code to return jsx
+  retun();
+```
+
+### onMutate
+এটি একটি callback function নিয়ে থাকে, যেটি `mutationFn` এর execute করে থাকে। 
+
+### onError
+এটি একটি callback function নিয়ে থাকে, যেটি server এ request send করার পরে কোন error হলে execute হয়ে থাকে। 

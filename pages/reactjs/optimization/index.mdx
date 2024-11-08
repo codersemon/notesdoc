@@ -1,0 +1,14 @@
+import { Callout } from "nextra/components";
+
+## Performance optimization
+
+একটা react application এর মধ্যে ছোট বড় অনেক component থাকে। আমরা যদি বড় component / যেগুলো render হতে অনেক সময় নিয়ে থাকে সেগুলো optimize করে দিই, তাহলে আমাদের application অনেক বেশি faster response করবে।
+
+<Callout emoji="⚠">
+  তবে সবসময় মনে রাখতে হবে, over optimization আমাদের application কে faster করার
+  পরিবর্তে আরও বেশি slower করে দিতে পারে। তাই অবশ্যই শুধুমাত্র expensive
+  functions, component, callback functions optimize করতে হবে। কেননা,
+  optimization করার জন্য react যেসকল function & hook দিয়ে থাকে, সেগুলোও তো কিছু
+  machanism use করে থাকে। তাই, এগুলোর যদি প্রয়োজনের তুলনায় বেশি ব্যবহার করি,
+  Performance faster হওয়ার পরিবর্তে আরও slow হয়ে যাবে।
+</Callout>

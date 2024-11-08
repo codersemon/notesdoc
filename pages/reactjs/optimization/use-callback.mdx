@@ -1,0 +1,26 @@
+## useCallback hook এর ব্যবহারঃ
+
+এই hook এর মাধ্যমে আমরা যেকোন function কে cache করে রাখতে পারি। যখন কোন function cache করে রাখার প্রয়োজন হয়, তখন এই hook ব্যবহার করা হয়ে থাকে। আমরা জানি, প্রতিটা function এবং object react এর কাজে নতুন নতুন reference দিয়ে থাকে প্রতিটা re-render এর সময়। যদিও functions & object একই থাকে, আমাদের দৃষ্টিতে একই রাখছি এবং কোন পরিবর্তন করছি না, তবুও এটি প্রতিটা re-render এ নতুন reference দিয়ে থাকে। যার ফলে, component গুলো re-render করে থাকে। এই সমস্যা থেকে বাঁচার জন্যই আমরা কোন function কে cache করে রাখতে useCallback hook ব্যবহার করে থাকি।
+
+নিচের কোডে একটি handler function কে cache করা হয়েছে। উল্লেখ্য, useCallback hook টি useEffect এর মত dependency তে reactive value নিয়ে থাকে। আর ঐ reactive value তে কোন পরিবর্তন হলে আগের cache রিমুভ করে নতুন করে cache করে থাকে।
+
+```js copy showLineNumbers
+// useCallback(function, dependency) // <-- syntax
+
+import { useCallback, useState } from "react";
+
+const Counter = () => {
+  const [count, setCount] = useState(0);
+
+  const handleIncrement = useCallback(() => {
+    setCount((prev) => prev + 1);
+  }, []);
+
+  return (
+    <>
+      <p>{count}</p>
+      <button onClick={handleIncrement}>Increment</button>
+    </>
+  );
+};
+```

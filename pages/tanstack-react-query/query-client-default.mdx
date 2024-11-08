@@ -1,0 +1,31 @@
+## QueryClient Default Configuration
+
+আমরা চাইলে সম্পূর্ণ application এর জন্য QueryClient এর মধ্যে default কিছু configuration set করে দিতে পারি, এটি `mutaions` & `query` এর জন্য কাজ করবে।
+
+```js copy showLineNumbers filename="main.jsx" {10-16}
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App.jsx";
+import "./index.css";
+
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+
+// create client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <App />
+      <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
+    </QueryClientProvider>
+  </React.StrictMode>
+);
+```

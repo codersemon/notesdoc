@@ -20,5 +20,9 @@ const themeConfig = {
   footer: {
     content: "Develop by Emon Khan",
   },
+  sidebar: {
+    defaultMenuCollapseLevel: 1,
+    autoCollapse: true,
+  }
 };
 export default themeConfig;

@@ -1,0 +1,61 @@
+{/* dependency */}
+import { FileTree, Steps } from 'nextra/components'
+
+## Why layouts
+
+আমরা যেহেতু DRY (Don’t Repeat Yourself) pattern follow করবো, তাই একই কোড বার বার না লিখার চেষ্টা করতে হবে। আর সেজন্যই প্রতিটা পেজের জন্য বার বার header, footer না বানিয়ে / ব্যবহার না করে একবারে প্রতিটা পেজে ব্যবহার করার জন্যই আমাদেরকে layout system এর মধ্যে আসতে হবে।
+
+## How to use
+
+Layout system ব্যবহার করার জন্য আমাদেরকে প্রথমে একটি Layout Component বানাতে হবে, যেখানে আমাদের header ও footer এবং `<Outlet />` react-router-dom package থেকে import করার মাধ্যমে প্রতিটা পেজের body content রাখতে হবে।
+
+<Steps>
+### Step 1
+প্রথমে Layout নামে একটি component বানাতে হবে। যেখানে header & footer সহ যেগুলো ঐ layout এর মধ্যকার common component হবে সেগুলো নিতে হবে। আর যেখানে প্রতিটা path এর component load করতে হবে সেখানে `react-router-dom` package থেকে `<Outlet />` import করে নিতে হবে।
+
+নিচের কোডে আমরা Layout এর মধ্যে Header & Footer Component common হিসেবে ব্যবহার করেছি।
+
+```js copy filename="Layout.jsx" showLineNumbers {2, 10}
+// dependencies
+import { Outlet } from "react-router-dom";
+import Footer from "./Footer";
+import Header from "./Header";
+
+const Layout = () => {
+  return (
+    <>
+      <Header />
+      <Outlet />
+      <Footer />
+    </>
+  );
+};
+
+export default Layout;
+```
+
+### Step 2 & Final Step
+
+আমাদের router এর মধ্যে প্রথমে element হিসেবে Layout component load করতে হবে। তারপরে সেই element এর children হিসেবে সব path & element বানাতে হবে।
+
+```js copy showLineNumbers filename="rootRoutes.jsx" {6-12}
+import { createBrowserRouter } from "react-router-dom";
+import Layout from "../components/layout/Layout";
+
+const router = createBrowserRouter([
+  {
+    element: <Layout />,
+    children: [
+      {
+        path: "/",
+        element: <h1>Homepage</h1>,
+      },
+    ],
+  },
+]);
+
+// export default
+export default router;
+```
+
+</Steps>

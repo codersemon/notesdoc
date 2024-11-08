@@ -1,0 +1,60 @@
+import { Steps } from "nextra/components";
+
+## Error Boundary Usecase
+
+আমাদের application এ কোন component এর মধ্যে যদি error আসে তাহলে পুরো application crash করবে যদি আমরা error handle না করি। তাই এই application যদি Error Boundary এর মধ্যে wrap করে দিই, তাহলে application crash না করে error দেখানো যাবে ইউজারদেরকে।
+
+<Steps>
+### Step 1 
+প্রথমে এই package install করে নিতে হবে।
+```js copy 
+npm i react-error-boundary 
+```
+
+### Step 2 & Final Step
+
+এরপরে `react-error-boundary` package থেকে `ErrorBoundary` component import করে নিতে হবে। আর যে component এর মধ্যে error হলে catch করতে চাই সেটা wrap করে দিতে হবে। fallback props এর মধ্যে component দিতে হবে, যেটা কোন error হলে দেখাতে চাই।
+
+```js copy showLineNumbers {1, 7, 9}
+import { ErrorBoundary } from "react-error-boundary";
+import PostList from "../components/PostList";
+
+const Homepage = () => {
+  return (
+    <>
+      <ErrorBoundary fallback={<h1>Something wrong!</h1>}>
+        <PostList />
+      </ErrorBoundary>
+    </>
+  );
+};
+
+export default Homepage;
+```
+
+### Contextual Error Handle
+
+আমরা চাইলেই সব component একটা `ErrorBoundary` এর মধ্যে রেখে দিতে পারি। এতে আমরা generic error message দেখাতে পারি। কিন্তু যদি component specific error দেখাতে চাই, তখন সেই component টি ErrorBoundary এর মধ্যে wrap করে দিতে হবে।
+
+```js copy showLineNumbers {10, 12, 7, 13}
+import { ErrorBoundary } from "react-error-boundary";
+import PostList from "../components/PostList";
+
+const Homepage = () => {
+  return (
+    <>
+      <ErrorBoundary fallback={<h1>Something wrong!</h1>}>
+        <PostList />
+
+        <ErrorBoundary fallback={<h1>Error in commment!</h1>}>
+          <Comments />
+        </ErrorBoundary>
+      </ErrorBoundary>
+    </>
+  );
+};
+
+export default Homepage;
+```
+
+</Steps>

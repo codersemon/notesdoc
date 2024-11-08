@@ -1,0 +1,63 @@
+{/* dependency */}
+import { FileTree, Steps } from 'nextra/components'
+
+## Installation process
+
+<Steps>
+### Step 1
+নিচের কমান্ড দিয়ে প্যাকেজটি install করে নিতে হবে।
+
+```js copy
+npm install react-router-dom
+```
+
+### Step 2
+
+<FileTree>
+  <FileTree.Folder name="src" defaultOpen>
+    <FileTree.Folder name="routes" defaultOpen>
+      <FileTree.File name="rootRoutes.jsx" />
+    </FileTree.Folder>
+    <FileTree.File name="App.jsx" />
+    <FileTree.File name="main.jsx" />
+    <FileTree.File name="index.css" />
+  </FileTree.Folder>
+</FileTree>
+
+উপরে যে file structure দেখতে পারছি সেটাই ফলো করা হয়েছে আমাদের নোটে, যেন modular way তে কাজ করা যায়। 
+
+`react-router-dom` package থেকে `createBrowserRouter` function import করে নিতে হবে। এই function এর মধ্যেই array of object হিসেবে প্রতিটি route define করতে হবে। প্রতিটি object এর মধ্যে `path` key তে path দিতে হবে আর  `element` key তে component দিতে হবে যেটি ঐ path এ গেলে দেখাতে চাই। 
+
+```js copy filename="rootRoutes.jsx" showLineNumbers {}
+import { createBrowserRouter } from "react-router-dom";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <h1>Hello world</h1>,
+  },
+]);
+
+// export default
+export default router;
+```
+
+### Step 3 & Final Step
+
+যে ফাইলে react-router init করতে চাই সেখানে RouterProvider element use করতে হবে। আর router props এর মধ্যে router দিয়ে দিতে হবে।
+
+নিচের কোডে আমরা App.jsx এর মধ্যে RouterProvider initilization করেছি। আর routes/rootRoutes এর মধ্যে আমরা সবগুলো routes define করার জন্য আলাদা ফাইল নিয়েছি modular way তে কাজ করার জন্য।
+
+```js copy filename="App.jsx" showLineNumbers {2,3,6}
+// dependencies
+import { RouterProvider } from "react-router-dom";
+import router from "./routes/rootRoutes";
+
+const App = () => {
+  return <RouterProvider router={router} />;
+};
+
+export default App;
+```
+
+</Steps>

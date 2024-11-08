@@ -1,0 +1,117 @@
+import { Steps } from "nextra/components";
+
+## Usecase of `Suspense` component
+
+`Suspense` react এর একটি component. এটি ব্যবহার করার মাধ্যমে Data fetch করার সময় যে loading state management করার মাধ্যমে UI তে loading component/ui দেখানোর প্রয়োজন হয়, সেটি খুব সহজেই আমরা manage করতে পারি।
+
+<Steps>
+### Step 1 
+প্রথমেই আমাদেরকে একটি promiseWrapper function বানিয়ে নিতে হবে। যেটি একটি promise parameter এর মধ্যে নিবে। এই ফাংশন নিজের মধ্যেই status & response state handle করবে। এটার উপরে যেহেতু UI নির্ভরশীল নয়, তাই এখানে `useState` hook ব্যবহার করার প্রয়োজন নেই।
+
+শুরুতে status pending থাকবে, আর response এ কিছুই থাকবে না। একটা suspender variable নিতে হবে যেটি parameter এ পাওয়া promise কে res বা error এ convert করবে। যদি res success হয় তাহলে status=success করে দিবে আর response=res দিয়ে দিবে। যদি res error হয় তাহলে status=error এবং response=error সেট করে দিবে।
+
+এখন read নামে একটি function নিতে হবে, যেটাই মূলত এই wrapPromise function টি return করবে। read function টি switch case এর মাধ্যমে `status` এর উপরে নির্ভর করে promise or response data return করবে।
+
+```js copy showLineNumbers filename="src/utils/wrapPromise.js"
+export const wrapPromise = (promise) => {
+  let status = "pending";
+  let response;
+
+  const suspender = promise.then(
+    (res) => {
+      status = "success";
+      response = res;
+    },
+    (error) => {
+      status = "error";
+      response = error;
+    }
+  );
+
+  const read = () => {
+    switch (status) {
+      case "pending":
+        throw suspender;
+
+      case "error":
+        throw response;
+
+      default:
+        return response;
+    }
+  };
+
+  return {
+    read,
+  };
+};
+```
+
+### Step 2
+
+২য় স্টেপে আমাদেরকে Data fetch করার function বানিয়ে নিতে হবে, যেটি সরাসরি data return করার পরিবর্তে শুধুমাত্র `promise` return করবে। আর promise সরাসরি return না করে wrapPromise(promise) function এর মধ্যে মুড়িয়ে return করতে হবে।
+
+```js copy showLineNumbers filename="postFetcher.js"
+import { wrapPromise } from "../utils/wrapPromise";
+
+export const getPosts = (url) => {
+  const promise = fetch(url).then((res) => res.json());
+
+  return wrapPromise(promise);
+};
+```
+
+### Step 3
+
+যে component এর মধ্যে data fetch হবে এবং fetch করার সময় loading component দেখাতে চাই, সেটি `react` package থেকে পাওয়া `<Suspense>` component এর মধ্যে দিয়ে দিতে হবে। আর `Suspense` এর fallback এ loading ui component দিয়ে দিতে হবে।
+
+```js showLineNumbers copy {1,7}
+import { Suspense } from "react";
+import PostList from "../components/PostList";
+
+const Homepage = () => {
+  return (
+    <>
+      <Suspense fallback={<div className="container">Loading posts...</div>}>
+        <PostList />
+      </Suspense>
+    </>
+  );
+};
+
+export default Homepage;
+```
+
+### Step 4 & Final Step
+
+এখন যে component এর মধ্যে আমরা data fetch করতে চাই, সেটা আগের স্টেপে `Suspense` দিয়ে মুড়িয়ে দিয়েছি। এখন component এর মধ্যে data fetch করতে হবে। data fetch করার জন্য আমরা ২য় স্টেপে যে function বানিয়েছিলাম সেটা import করে component এর বাইরে ব্যবহার করতে হবে। এরপরে component এর মধ্যে ঐ fetcher function টি থেকে read() function invoke করতে হবে। তাহলেই read() function promise resolve হবার পরে data return করবে।
+
+```js copy showLineNumbers {3,6}
+import { getPosts } from "../fetchers/postFetch";
+
+const resource = getPosts("https://jsonplaceholder.typicode.com/posts");
+
+const PostList = () => {
+  const posts = resource.read();
+
+  return (
+    <div className="container">
+      <ul>
+        {posts?.length > 0 ? (
+          posts?.map((post) => (
+            <li key={post?.id}>
+              {post?.id} {post?.title}
+            </li>
+          ))
+        ) : (
+          <h1>No post found!</h1>
+        )}
+      </ul>
+    </div>
+  );
+};
+
+export default PostList;
+```
+
+</Steps>

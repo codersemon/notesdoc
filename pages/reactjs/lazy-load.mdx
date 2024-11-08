@@ -1,0 +1,29 @@
+import { Steps } from "nextra/components";
+
+## Lazy load কেন?
+
+আমাদের react application এর মধ্যে যখন `import {Something} from "somefile"` or `import something from "somefile"` এভাবে কোন component import করে ব্যবহার করি, তখন application run করার সময় আমাদের স্ক্রিনে সব component দেখার দরকার না হলেও সব একবারে server থেকে download করে ফেলে। এর ফলে আমাদের application অনেকটা স্লো হয়ে পড়ে। তাই এই সমস্যা সমাধান করার জন্য যখন যেটা প্রয়োজন শুধুমাত্র সেটা import করার জন্য `react` package `lazy()` নামে একটি function দেয়, সেটার মাধ্যমে import করলে অপ্রয়োজনীয় componet যেটা এখন আমাদের screen এ লাগছে না সেটা অযথা import করবে না। ফলে, আমাদের application অনেক দ্রুত load হবে।
+
+<Steps>
+### Step 1 
+প্রথমে `react` package থেকে `lazy` import করে নিতে হবে। এরপরে একটা variable এর মধ্যে আমাদের component কে `lazy()` এর মাধ্যমে import করতে হবে। `lazy()` একটি callback function নিয়ে থাকে আর এই callback এর মধ্যে `import()` method ব্যবহার করতে হবে। `import()` JS এর built-in function, যেটিতে filePath দিয়ে দিলে একটি promise return করে থাকে।
+
+```js copy showLineNumbers {1,4}
+import { lazy } from "react";
+
+import About from "../pages/About";
+const About = lazy(() => import("../pages/About"));
+```
+
+### Step 2 & Final Step
+আগের স্টেপে আমরা দেখেছি `import()` function promise return করে, তাই সেটি handle করার জন্য `About` component কে `Suspense` এর মধ্যে wrap করে ব্যবহার করতে হবে। 
+
+```js copy showLineNumbers {}
+import { Suspense } from "react";
+
+<Suspense>
+  <About />
+</Suspense>;
+```
+
+</Steps>

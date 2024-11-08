@@ -1,0 +1,189 @@
+## useQuery Hook পরিচিতি
+
+Data fetch & reFetch করার জন্য `useQuery` hook ব্যবহার করা হয়ে থাকে। এই hook দিয়ে dataFetch related কাজ করা হয়ে থাকে। একটা জিনিস মনে রাখতে হবে, ReactQuery নিজে সরাসরি API request send করতে পারে না। এটি server & client এর মধ্যে communication এ help করে থাকে। যেমন, client এ এখন যে ডেটা আছে সেটা server এর সাথে sync না, RQ নিজের থেকে সার্ভারে যে system এর মাধ্যমে data fetch করা হচ্ছে, সেটাকে বলে দিবে আমাকে আপডেট ডেটা দাও, তখন সার্ভার আপডেট ডেটা দিবে, আর RQ নিজের state এ সেটাকে আপডেট করে client এ দেখাবে। data fetch system হতে পারে axios, browser এর default fetch api বা অন্য কোন fetching library.
+
+## useQuery hook ব্যবহার করার পদ্ধতি
+
+যেখানে useQuery hook ব্যবহার করতে চাই সেখানে name import করে নিতে হবে `@tanstack/react-query` package থেকে। এরপরে useQuery এর মধ্যে একটি object pass করতে হবে, যে object এর মধ্যে সব option দেওয়া যাবে।
+
+এই hook যেমন একাধিক option নিতে পারে, তেমনি অনেক ধরনের data retun করে থাকে। তবে আমরা, option হিসেবে queryKey, queryFn বেশি ব্যবহার করবো আর এই দুটি key required আর return হিসেবে নিবো data, error, isLoading .. error & isLoading এর উপর নির্ভর করে আলাদা component দেখানো যাবে।
+
+`queryKey` তে আমাদেরকে একটা key দিতে হবে, যেই key এর অধীনে cache manage করা হবে। প্রতিটা query cache করার জন্য প্রতিটা query এর unique key দিতে হবে।
+`queryFn` এ fetcher function দিতে হবে, যেটার মাধ্যমে আমরা Data fetch করতে পারি।
+
+```js copy showLineNumbers {2, 12-15, 5-8}
+// dependencies
+import { useQuery } from "@tanstack/react-query";
+
+// product fetching function
+const getProducts = async () => {
+  const response = await API.get("https://dummyjson.com/products");
+  return response.data;
+};
+
+const ProductsList = () => {
+  // getting products data from db
+  const { data, error, isLoading } = useQuery({
+    queryKey: ["products"],
+    queryFn: getProducts,
+  });
+
+  // rest codes
+  retun();
+};
+
+export default ProductsList;
+```
+
+## Query options
+
+useQuery তে অনেক options দেওয়া যায়, সেগুলোর কিছু কিছু নিচে উল্লেখ করা হলোঃ
+
+### queryFn
+
+এটি একটি function except করে, যেটা query চলার সময় এক্সিকিউট করেই data fetch করবে axios কিংবা fetch Api এর মাধ্যমে। এই function -টি parameter এর মধ্যে queryKey টা destructre করে পেতে পারে। নিচের উদাহরণে axios এর মাধ্যমে fetch করা হয়েছে। আর axios এর মধ্যে baseURL দেওয়া আছে, তাই এখানে শুধুমাত্র API Endpoint দেওয়া হয়েছে, সরাসরি /products লিখলেও হতো, তবে এখানে যেহেতু queryKey থেকে একই key পাওয়া যাচ্ছে তাই সেটাকেই dynamically ব্যবহার করে দেওয়া হয়েছে।
+
+```js copy showLineNumbers {1, 11}
+const getProducts = async ({ queryKey }) => {
+  const response = await API.get(`/${queryKey[0]}`);
+  return response.data;
+};
+
+const ProductsList = () => {
+  // getting products data from db
+  const { data, error, isLoading } = useQuery({
+    queryKey: ["products"],
+    queryFn: getProducts,
+  });
+
+  // rest codes
+  retun();
+};
+
+export default ProductsList;
+```
+
+### queryKey
+
+প্রতিটা query cache করার জন্য প্রতিটা query এর unique key দিতে হবে।
+
+```js copy showLineNumbers {2}
+const { data, error, isLoading } = useQuery({
+  queryKey: ["products"],
+  queryFn: getProducts,
+});
+```
+
+যদি কোন key এর sub key বানাতে চাই, তাহলে 2nd array item দিতে হবে। যেমন products এর singleItem প্রোডাক্ট related, users এর singleItem হবে users এর subKey.
+
+আর আমরা আগেই জেনেছি fetcher function এর parameter এর মধ্যে destructre করে queryKey পেতে পারি। single product fetch করার সময় `queryKey` এর array তে দুইটা element দেওয়া হয়েছে, তাই সেভাবেই array index অনুযায়ী সবগুলো queryKey পাওয়া যাবে, যেটি ১৩ নম্বর লাইনে ব্যবহার করা হয়েছে। `queryKey[0]=products` & `queryKey[1]=id` এর value পাওয়া যাবে।
+
+```js copy showLineNumbers {3, 13, 23}
+// getting products
+const {
+  data: products,
+  error,
+  isLoading,
+} = useQuery({
+  queryKey: ["products"],
+  queryFn: getProducts,
+});
+
+// product getting function
+const getProductDetails = async ({ queryKey }) => {
+  const response = await API.get(`/${queryKey[0]}/${queryKey[1]}`);
+  return response.data;
+};
+
+// getting single product
+const {
+  data: product,
+  error,
+  isLoading,
+} = useQuery({
+  queryKey: ["products", id],
+  queryFn: getProductDetails,
+});
+```
+
+যদি query params নিয়ে কাজ করতে হয় তাহলে curly braces এর মধ্যে paramId দিয়ে object আকারে paramValue দিতে হবে। url এর মধ্যে যখন `https://example.com/?language=en` এইরকম কোন query params কে পাঠাতে চাই তখন curly braces এর মধ্যে ব্যবহার করতে হবে।
+
+```js copy showLineNumbers {7}
+// getting single product
+const {
+  data: product,
+  error,
+  isLoading,
+} = useQuery({
+  queryKey: ["products", id, {language="en"}],
+  queryFn: getProductDetails,
+});
+```
+
+### retry
+
+true/false/number - এটি false দিলে একবার queryFn execute হয়ে বন্ধ হয়ে যাবে। default ভাবে true থাকে আর 3 বার try করে যদি server এ connection setup করতে ব্যর্থ হয়। চাইলে এখানে number দেওয়া যায়, যত নাম্বার দিবো, data / reponse না পাওয়া পর্যন্ত ততবার queryFn execute হবে।
+
+```js copy showLineNumbers {}
+// getting products
+const {
+  data: products,
+  error,
+  isLoading,
+} = useQuery({
+  queryKey: ["products"],
+  queryFn: getProducts,
+  retry: true / false / number,
+});
+```
+
+### staleTime
+
+কত miliseconds পরে Data stale হবে সেটা সেট করে দেওয়া যাবে এই key এর মাধ্যমে। এখানে default 0 দেওয়া থাকে। Infinity দিলে কখনই stale হবে না, আর আমরা চাইলে এখানে একটা callback function দিতে পারি, যেটার মাধ্যমে number return করতে হবে অবশ্যই।
+
+```js copy showLineNumbers {9}
+// getting products
+const {
+  data: products,
+  error,
+  isLoading,
+} = useQuery({
+  queryKey: ["products"],
+  queryFn: getProducts,
+  staleTime: 1000/Infinity/callback function to retun number
+});
+```
+
+### refetchInterval
+
+এই key এর মাধ্যমে বলে দিতে পারি কত miliseconds পর পর `queryFn` execute হওয়ার মাধ্যমে নতুন data fetch করবে server থেকে।
+
+```js copy showLineNumbers {}
+// getting products
+const {
+  data: products,
+  error,
+  isLoading,
+} = useQuery({
+  queryKey: ["products"],
+  queryFn: getProducts,
+  refetchInterval: 5000,
+});
+```
+
+### refetchOnWindowFocus
+
+এই key এর মাধ্যমে browser এর window একটা থেকে অন্যটায় গিয়ে আবার ফেরত আসলে যদি database এ কোন পরিবর্তন হয় সেটা দেখা যাবে কিনা তা নিয়ন্ত্রণ করা যাবে। এটার default value হচ্ছে true, অর্থাৎ tab এর focus হারানোর পরে আবার focus এ আসলেই reFetch করে নতুন data দেখাবে, তবে `এক্ষেত্রে data অবশ্যই stale হতে হবে`। `false` দিলে focus এর জন্য reFetch হবে না। `always` দিলে সবসময়ই focus এ আসলেই reFetch করবে। 
+
+```js copy showLineNumbers {9}
+// getting products
+const {
+  data: products,
+  error,
+  isLoading,
+} = useQuery({
+  queryKey: ["products"],
+  queryFn: getProducts,
+  refetchOnWindowFocus: false / true / "always",
+});
+```

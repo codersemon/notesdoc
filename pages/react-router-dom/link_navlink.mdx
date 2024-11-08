@@ -1,0 +1,48 @@
+## Link instead of anchor tag
+
+আমরা যদি react-router-dom use করি তাহলে a tag ব্যবহার করলে আমাদের app reload নিবে। কিন্তু react app যদি reload নেয় সেটা আমাদের জন্য অনাকাঙ্ক্ষিত হবে। তাই a tag এর পরিবর্তে Link component use করতে হবে। আর href এর পরিবর্তে to use করতে হয়।
+
+```js copy showLineNumbers {2, 7-8}
+// dependencies
+import { Link } from "react-router-dom";
+
+const Header = () => {
+  return (
+    <>
+      <Link to="/about">About us</Link> |<Link to="/">Home</Link>
+    </>
+  );
+};
+
+export default Header;
+```
+
+## NavLink Component
+
+Link component ব্যবহার করলে আমাদেরকে active path বের করার জন্য ভিন্নভাবে কাজ করতে হয়। কিন্তু, NavLink component ব্যবহার করলে খুব সহজেই active path identify করে সেই অনুযায়ী বিভিন্ন decision make করা সম্ভব হয়।
+
+NavLink component একইভাবে Link এর মত to props এর মধ্যে href নিয়ে থাকে। NavLink ব্যবহার করলে active path এ by default `active` class add করে দেয়, আর আমরা যদি pending & active আলাদাভাবে handle করতে চাই তাহলে className এর মধ্যে একটি callback function দিয়ে isActive, isPending state বের করে নিতে পারি। আর এই ক্লাস অনুযায়ী আমাদেরকে css লিখে দিলেই কাজ হয়ে যাবে।
+
+```js copy showLineNumbers {2, 7, 11-13}
+// dependencies
+import { NavLink } from "react-router-dom";
+
+const Header = () => {
+  return (
+    <>
+      <NavLink to="/">Home</NavLink>
+
+      <NavLink
+        to="/about"
+        className={({ isActive, isPending }) =>
+          isPending ? "pending" : isActive ? "active" : ""
+        }
+      >
+        About us
+      </NavLink>
+    </>
+  );
+};
+
+export default Header;
+```

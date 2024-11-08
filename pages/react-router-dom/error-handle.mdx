@@ -1,0 +1,98 @@
+{/* dependencies */}
+import { Steps } from "nextra/components";
+
+## Global Error Handle
+
+আমরা যখন application develop করবো কিংবা user app visit করবে তখন বিভিন্ন রকমের error দেখা যাবে। এই error আমাদের নির্ধারিত template এর মাধ্যমে handle করা যাবে।
+
+<Steps>
+### Step 1
+
+আমাদেরকে ErrorPage.jsx file বানাতে হবে, যেখানে error template এর design করা থাকবে। এই component এর মধ্যে `useRouteError` hook `react-router-dom` package থেকে named import করে নিতে হবে। এই hook এর `statusText` || `message` key এর মধ্যে error পাওয়া যাবে, যেটা আমাদের component এর মধ্যে ইচ্ছামত জায়গা ব্যবহার করতে পারবো।
+
+নিচের উদাহরণে hook থেকে পাওয়া error.statusText থাকলে সেটি অথবা error.message থাকলে সেটি দেখানো হচ্ছে।
+
+```js copy filename="ErrorPage.jsx" showLineNumbers {2, 5, 12}
+// dependencies
+import { useRouteError } from "react-router-dom";
+
+const ErrorPage = () => {
+  const error = useRouteError();
+
+  return (
+    <div id="error-page">
+      <h1>Oops!</h1>
+      <p>Sorry, an unexpected error has occurred.</p>
+      <p>
+        <i>{error.statusText || error.message}</i>
+      </p>
+    </div>
+  );
+};
+
+export default ErrorPage;
+```
+
+### Step 2 & Final Step
+
+এখন আমাদেরকে আগের স্টেপে বানানো `errorElement` component কে `errorElement` key তে দিয়ে দিতে হবে। আমাদের নিচের কোডে Global level এ error handling এর জন্য set করা হয়েছে। ফলে নিচের সব children route এর সব error handle করবে।
+
+```js copy showLineNumbers filename="rootRoutes.jsx" {8}
+import { createBrowserRouter } from "react-router-dom";
+import Layout from "../components/layout/Layout";
+import ErrorPage from "../pages/ErrorPage";
+
+const router = createBrowserRouter([
+  {
+    element: <Layout />,
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        path: "/",
+        element: <h1>Homepage</h1>,
+      },
+      {
+        path: "/about",
+        element: <h1>About us</h1>,
+      },
+    ],
+  },
+]);
+
+// export default
+export default router;
+```
+
+</Steps>
+
+## Contextual Error Handle
+Layout system ব্যবহার করলে, layout এ errorElement set করে দিলে globally সব error handle করতে পারে। কিন্তু specific route এর জন্য specific errorElement সেট করা যায়। তাহলে ঐ route এ কোন error হলে, ঐ element এর মাধ্যমে show করবে।
+
+নিচের উদাহরণে root route এ একটি errorElement আছে, আবার about route এ আলাদা errorElement add করা হয়েছে। 
+
+```js copy showLineNumbers filename="rootRoutes.jsx" {8,17}
+import { createBrowserRouter } from "react-router-dom";
+import Layout from "../components/layout/Layout";
+import ErrorPage from "../pages/ErrorPage";
+
+const router = createBrowserRouter([
+  {
+    element: <Layout />,
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        path: "/",
+        element: <h1>Homepage</h1>,
+      },
+      {
+        path: "/about",
+        element: <h1>About us</h1>,
+        errorElement: <h1>Error in about route</h1>,
+      },
+    ],
+  },
+]);
+
+// export default
+export default router;
+```

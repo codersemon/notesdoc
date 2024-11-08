@@ -1,0 +1,37 @@
+import { Steps } from "nextra/components";
+
+## Installation Process
+
+<Steps>
+### Step 1 
+প্রথমেই @tanstack/react-query এই package আমাদের প্রজেক্টে install করে নিতে হবে।
+
+```js copy
+npm i @tanstack/react-query
+```
+
+### Step 2 & Final Step
+
+এখন main.jsx file এর মধ্যে `QueryClient`, `QueryClientProvider` named import করে নিতে হবে @tanstack/react-query pacakge থেকে। এরপরে App component QueryClientProvider দিয়ে wrap করে দিতে হবে। QueryClient দিয়ে একটি variable এর মধ্যে `instance` create করতে হবে। আর সেই variable -টি QueryClientProvider এর client props এর মধ্যে দিয়ে দিতে হবে। এভাবেই খুব সহজে ReactQuery setup complete হয়ে যাবে।
+
+```js copy showLineNumbers filename="main.jsx" {6, 9, 13, 15}
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App.jsx";
+import "./index.css";
+
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+// create client
+const queryClient = new QueryClient({});
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <App />
+    </QueryClientProvider>
+  </React.StrictMode>
+);
+```
+
+</Steps>

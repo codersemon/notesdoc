@@ -1,0 +1,45 @@
+import { Steps } from "nextra/components";
+
+## Why Dev Tools
+
+এটি ব্যবহার করলে আমাদের প্রজেক্ট থেকে আমরা সহজেই ReactQuery related inspection করতে পারবো। যেমনঃ কোন কোন `key` তে cache হচ্ছে, fetching ইত্যাদি দেখা যাবে।
+
+## Dev Tools Setup
+
+<Steps>
+### Step 1 
+প্রথমে `@tanstack/react-query-devtools` package install করে নিতে হবে।
+
+```js copy
+npm i @tanstack/react-query-devtools
+```
+
+### Step 2 & Final Step
+
+এরপরে ঐ প্যাকেজ থেকে `ReactQueryDevtools` component named import করে নিতে হবে। তারপরে component টি QueryClientProvider এর মধ্যে ব্যবহার করতে হবে।
+
+`ReactQueryDevtools` componet এর initialIsOpen props এর value false দিলে আমাদের প্রজেক্টে গেলে devtools by default close দেখতে পারবো, আর true দিলে by default open দেখতে পারবো। buttonPosition এর মাধ্যমে নির্ধারণ করে দিতে পারবো কোথায় devtools show/hide toggler button দেখা যাবে।
+
+```js copy showLineNumbers {7, 16}
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App.jsx";
+import "./index.css";
+
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+
+// create client
+const queryClient = new QueryClient({});
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <App />
+      <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
+    </QueryClientProvider>
+  </React.StrictMode>
+);
+```
+
+</Steps>

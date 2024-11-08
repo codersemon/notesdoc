@@ -1,0 +1,31 @@
+## useMemo hook এর ব্যবহারঃ
+
+useMemo hook useCallback এর মতই function cache করে থাকে। কিন্তু, পার্থক্য হচ্ছে return এর মধ্যে। useCallback এর মধ্যে যে function দেওয়া হয় সেটি cache করে রাখে আর useMemo এর মধ্যে যে function দেওয়া হয় সেটার result টি একটি variable এর মত return করে থাকে।
+
+```js copy showLineNumbers {9-13, 20}
+// useMemo(function, dependency) // <-- syntax
+
+import { useMemo, useState } from "react";
+
+const Counter = () => {
+  const [count1, setCount1] = useState(0);
+  const [count2, setCount2] = useState(0);
+
+  const isEven = useMemo(() => {
+    let i = 0;
+    while (i < 10000) {
+      i++;
+    }
+
+    return count % 2 === 0;
+  }, [count]);
+
+  return (
+    <p>
+      <p>Count one is: {isEven ? "Yes" : "No"}</p>
+      <p>Count1: {count1}</p>
+      <p>Count2: {count2}</p>
+    </p>
+  );
+};
+```

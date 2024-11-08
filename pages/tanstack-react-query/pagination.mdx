@@ -1,0 +1,91 @@
+import { Steps } from "nextra/components";
+
+## Pagination
+
+এই পেজিনেশন `নির্ভর করে সার্ভার response এর উপরে`। কেননা, API যেভাবে ডেটা প্রদান করবে, সেই অনুযায়ী code লিখতে হবে। ReactQuery কিভাবে pagination করে থাকে সেটা শেখার জন্য json-server ব্যবহার করবো। json server pagination url: `endpoint?\_page=1&\_per_page=6` json-server api response:
+
+json-server নিচের মতো response দিয়ে থাকে paginated request এর ক্ষেত্রে
+
+```json
+{
+  "first": 1,
+  "prev": null,
+  "next": 2,
+  "last": 4,
+  "pages": 4,
+  "items": 37,
+  "data": [
+    {
+      "id": "1",
+      "title": "iPhone 9",
+      "description": "An apple mobile which is nothing like apple",
+      "price": 549,
+      "rating": 4.69,
+      "thumbnail": "https://cdn.dummyjson.com/product-images/1/thumbnail.jpg"
+    }
+
+    // rest
+  ]
+}
+```
+
+<Steps>
+### Step 1
+
+প্রথমে currentPage tract করার জন্য একটা state নিতে হবে। এরপরে সেই state এর ভেলু useQuery hook এর queryKey এর মধ্যে parameter হিসেবে send করে দিতে হবে। আর সেটি queryFn থেকে receive করে API URL এর মধ্যে দিতে হবে।
+
+```js copy showLineNumbers {3, 9, 16, 20}
+// dependencies
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import API from "../utils/axios";
+
+// product fetching function
+const getProducts = async ({ queryKey }) => {
+  const response = await API.get(
+    `/${queryKey[0]}?_page=${queryKey[1].page}&_per_page=6`
+  );
+  return response.data;
+};
+
+const ProductsList = ({ onViewClick }) => {
+  // pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // getting products data from db
+  const { data, error, isLoading } = useQuery({
+    queryKey: ["products", { page: currentPage }],
+    queryFn: getProducts,
+  });
+
+ // rest code to return jsx
+ return ();
+
+}
+```
+
+### Step 2 & Final Step
+
+এরপরে pagination এর জন্য button বানাতে হবে, যেখানে onClick এর মাধ্যমে currentPage এর value update হবে, আর value update হবার সাথে সাথেই API তে নতুন url যাবে, আর নতুন data এনে cache করে ফেলবে ReactQuery
+
+```js copy showLineNumbers {}
+{data.prev && (
+    <li
+        className="border p-2 cursor-pointer hover:bg-blue-500 hover:text-white transition-all duration-200"
+        onClick={() => setCurrentPage(data.prev)}
+    >
+        Prev
+    </li>
+    )}
+
+{data.next && (
+    <li
+        className="border p-2 cursor-pointer hover:bg-blue-500 hover:text-white transition-all duration-200"
+        onClick={() => setCurrentPage(data.next)}
+    >
+        Next
+    </li>
+    )}
+```
+
+</Steps>

@@ -1,0 +1,28 @@
+import { Callout } from 'nextra/components'
+
+## useNavigate Hook to send back
+
+যদি user -কে previous page এ return করাতে চাই, সেক্ষেত্রে এই useNavigate hook কাজ করবে।
+
+`useNavigate` hook `react-router-dom` package থেকে named import করে নিতে হবে। তারপরে এটি clickHandler হিসেবে ব্যবহার করতে হবে। clickHandler function এর মধ্যে -1 args দিয়ে দিলে 1step back করাবে।
+
+```js copy showLineNumbers {2, 9}
+// dependencies
+import { useNavigate } from "react-router-dom";
+
+const About = () => {
+    const navigate = useNavigate();
+  return (
+    <>
+      <h2>About</h2>
+      <button onClick={() => navigate(-1)}>Go Back</button>
+    </>
+  );
+};
+
+export default About;
+```
+
+<Callout type="warning" emoji="⚠️">
+  যত স্টেপ back এ নিতে চাই সেটা `-` দিয়ে দিতে হবে, আর যত স্টেপ forward এ নিতে চাই সেটা `+` দিয়ে navigate(stepsValue) call করাতে হবে।
+</Callout>
