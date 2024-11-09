@@ -1,0 +1,331 @@
+import { Steps } from "nextra/components";
+
+## Authentication & Authorization
+
+### Authentication
+
+এটি এমন পদ্ধতি যেখানে user তার ইমেইল এবং পাসওয়ার্ড দেওয়ার পরে সার্ভারের মাধ্যমে database এ চেক করার পরে ঐ ইমেইল এবং পাসওয়ার্ড মিলে গেলে তাকে ওয়েবসাইটের প্রটেক্টেড কন্টেট explore করার সুযোগ দেওয়া। এখানে ইমেইল এবং পাসওয়ার্ড দিয়েই যে শুধুমাত্র Authentication করা যেতে পারে ব্যাপারটা এমন নয়। password less authentication করা যেতে পারে, ইমেইল ছাড়াই uniqe identifier দিয়েও user কে identify করা যেতে পারে।
+
+Authentication বিভিন্ন ধরনের হয়ে থাকে। যেমনঃ
+
+- Single factor authentication (শুধুমাত্র username/email & password ব্যবহার করা হয়)
+- Two factor authentication (এক্ষেত্রে username/email & password match করার পরে user এর ইমেইল বা মোবাইলে একটি OTP [One Time Password] পাঠিয়ে সেটাও যাচাই করা হয়। এছাড়াও বিভিন্ন authenticator app এর সাহায্যেও two factor authentication করা হয়ে)
+- Multi factor authentication (এক্ষেত্রে একাধিক পদ্ধতির মধ্য দিয়ে যাবার মাধ্যমেই user কে authenticate করা হয়। যেমনঃ face scan, finger scan, two factor etc একত্রে ব্যবহার করা )
+
+### Authorization
+
+একটা user কে অথেনটিকেট করার পরে তার কাছে accessToken রাখা হয়ে থাকে। এই এক্সেস টোকেনের মাধ্যমে user এর প্রতিটা request কে validate করা হয়ে থাকে। এই টোকেন ব্যবস্থার জন্য ইউজারকে প্রতিটা request এর জন্য বারবার authenticate করার প্রয়োজন হয়না। তবে, user যখন কোন request পাঠায় তখন দেখা হয় তার সেই request এর তথ্য এক্সেস করার পারমিশন আছে কিনা, যদি না থাকে তাহলে তাকে সেই request এর জন্য data দেওয়া হবে না। আর user এর এই এক্সেস ক্যাপাবিলিটি চেক করার কাজই করে থাকে authorization এর মাধ্যমে।
+
+## User Registration With Email and Password
+
+<Steps>
+### Step 1 
+firebase console থেকে `sign-in-method` এর মধ্যে `Email/Password` enable করে নিতে হবে।
+
+### Step 2
+
+প্রথমেই আমরা যেখানে firebaseApp initialize করেছি সেখানে `firebase/auth` থেকে `getAuth` named import করে নিতে হবে এবং `getAuth` কে firebaseApp দিয়ে initialize করে export করে দিতে হবে।
+
+```js copy showLineNumbers filename="src/firebase/firebaseInitialize.js" {3, 19}
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_APP_ID,
+};
+
+// Initialize Firebase & export
+export const firebaseApp = initializeApp(firebaseConfig);
+
+// Initialize auth & export
+export const firebaseAuth = getAuth(firebaseApp);
+```
+
+### Step 3
+
+এখন firebaseInitialize file থেকে `firebaseApp` named import করতে হবে যেটা আমরা আগের স্টেপে export করেছিলাম এবং `firebase/auth` থেকে `createUserWithEmailAndPassword` method named import করতে হবে।
+
+`createUserWithEmailAndPassword` এই মেথড 1st arg হিসেবে `firebaseAuth` 2nd arg এ email এবং 3rd arg এ password দিলেই user account create করে দিবে। password অবশ্যই minimum 6 characters হতে হবে। `createUserWithEmailAndPassword` user account create করার পরে response এর মধ্যে অনেক data return করে, আমরা সেই response এর `user` key তে created user এর তথ্য পাবো।
+
+```js showLineNumbers copy filename="src/firebase/firebaseUtility.js" {}
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { firebaseAuth } from "./firebaseInitialize";
+
+/**
+ * Register user with email and password
+ */
+export const registerUserWithEmailAndPassword = async (email, password) => {
+  const response = await createUserWithEmailAndPassword(
+    firebaseAuth,
+    email,
+    password
+  );
+
+  return response.user;
+};
+```
+
+### Step 4 & Final Step
+
+এখন আমাদেরকে আমাদের component এর মধ্যে এসে form submit করার সময় আগের স্টেপে বানাও register function এর মধ্যে `email` & `password` দিয়ে দিলেই কাজ হয়ে যাবে।
+
+```js copy showLineNumbers filename="Register.jsx" {1, 8-18}
+import { registerUserWithEmailAndPassword } from "../firebase/firebaseUtility";
+
+const RegisterPage = () => {
+  // handle form submission to register user
+  const handleFormSubmission = async (e) => {
+    e.preventDefault();
+
+    try {
+      const user = await registerUserWithEmailAndPassword(
+        input.email,
+        input.password
+      );
+
+      console.log(user);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // return jsx code here
+};
+```
+
+</Steps>
+
+## User Login With Email and Password
+
+<Steps>
+### Step 1 
+[Register Step 2](/firebase/authentication#step-1) এ যেভাবে `firebaseAuth` বানিয়েছিলাম সেটা এখানে import করে নিবো। এরপরে `firebase/auth` থেকে `signInWithEmailAndPassword` named import করে নিতে হবে।
+
+`signInWithEmailAndPassword` এই মেথড 1st arg হিসেবে `firebaseAuth` 2nd arg এ email এবং 3rd arg এ password দিলেই user login করে দিবে। `signInWithEmailAndPassword` user account create করার পরে response এর মধ্যে অনেক data return করে, আমরা সেই response এর `user` key তে logged-in user এর তথ্য পাবো।
+
+```js copy showLineNumbers filename="src/firebase/firebaseUtility.js" {1,2, 8-13}
+import { firebaseAuth } from "./firebaseInitialize";
+import { signInWithEmailAndPassword } from "firebase/auth";
+
+/**
+ * Login use with email and password
+ */
+export const loginUserByEmailAndPassword = async (email, password) => {
+  const response = await signInWithEmailAndPassword(
+    firebaseAuth,
+    email,
+    password
+  );
+  return response.user;
+};
+```
+
+### Step 2 & Final Step
+
+এখন আমাদেরকে আমাদের component এর মধ্যে এসে form submit করার সময় আগের স্টেপে বানাও login function এর মধ্যে `email` & `password` দিয়ে দিলেই কাজ হয়ে যাবে।
+
+```js copy showLineNumbers filename="LoginPage.jsx" {1, 8-18}
+import { loginUserByEmailAndPassword } from "../firebase/firebaseUtility";
+
+const LoginPage = () => {
+  // handle form submission to register user
+  const handleFormSubmission = async (e) => {
+    e.preventDefault();
+
+    try {
+      const user = await loginUserByEmailAndPassword(
+        input.email,
+        input.password
+      );
+
+      console.log(user);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // return jsx code here
+};
+```
+
+</Steps>
+
+## Logout User
+
+<Steps>
+### Step 1 
+[Register Step 1](/firebase/authentication#step-1) এ যেভাবে `firebaseAuth` বানিয়েছিলাম সেটা এখানে import করে নিবো। এরপরে `firebase/auth` থেকে `signOut` named import করে নিতে হবে।
+
+`signOut` এই মেথড arg হিসেবে শুধুমাত্র `firebaseAuth` দিলেই user logout করে দিবে।
+
+```js copy showLineNumbers filename="src/firebase/firebaseUtility.js" {1,2, 8}
+import { firebaseAuth } from "./firebaseInitialize";
+import { signOut } from "firebase/auth";
+
+/**
+ * Login use with email and password
+ */
+export const loginUserByEmailAndPassword = async () => {
+  await signOut(firebaseAuth);
+};
+```
+
+### Step 2 & Final Step
+
+এখন আমাদেরকে আমাদের component এর মধ্যে এসে যেখানে ক্লিক করলে logout হবে সেখানে handler বসিয়ে দিলেই কাজ হয়ে যাবে।
+
+```js copy showLineNumbers {1, 3-12}
+import { logoutUser } from "../../firebase/firebaseUtility";
+
+// handle logout
+const handleLogout = async (e) => {
+  e.preventDefault();
+
+  try {
+    await logoutUser();
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+```
+
+</Steps>
+
+## Reset Password
+
+<Steps>
+### Step 1 
+[Register Step 1](/firebase/authentication#step-1) এ যেভাবে `firebaseAuth` বানিয়েছিলাম সেটা এখানে import করে নিবো। এরপরে `firebase/auth` থেকে `sendPasswordResetEmail` named import করে নিতে হবে।
+
+`sendPasswordResetEmail` এই মেথড 1st arg হিসেবে `firebaseAuth` 2nd arg এ email দিলেই registered email এ password reset link send করে দিবে। এই মেথড কোন কিছু return করে না।
+
+```js copy showLineNumbers filename="src/firebase/firebaseUtility.js" {1,2, 8}
+import { firebaseAuth } from "./firebaseInitialize";
+import { sendPasswordResetEmail } from "firebase/auth";
+
+/***
+ * Send password reset request email
+ */
+export const passwordResetRequest = async (email) => {
+  sendPasswordResetEmail(firebaseAuth, email);
+};
+```
+
+### Step 2 & Final Step
+
+এখন আমাদেরকে আমাদের component এর মধ্যে এসে form submit করার সময় আগের স্টেপে বানাও register function এর মধ্যে `email` দিয়ে দিলেই কাজ হয়ে যাবে।
+
+```js copy showLineNumbers filename="Register.jsx" {1, 8-12}
+import { registerUserWithEmailAndPassword } from "../firebase/firebaseUtility";
+
+const RegisterPage = () => {
+  // handle form submission to reset user password
+  const handleFormSubmission = async (e) => {
+    e.preventDefault();
+
+    try {
+      await passwordResetRequest(input.email);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // return jsx code here
+};
+```
+
+</Steps>
+
+## Social Login
+
+Google/Gmail, Facebook, Apple, Github, Twitter, Microsoft, Yahoo ইত্যাদি ব্যবহার করে login করানো সম্ভব। নিচে সেগুলো দেওয়া হলোঃ
+
+### Login with Google/Gmail
+
+<Steps>
+#### Step 1 
+firebase console থেকে `sign-in-method` এর মধ্যে `Google` enable করে নিতে হবে।
+
+#### Step 2
+প্রথমেই আমরা যেখানে firebaseApp initialize করেছি সেখানে `firebase/auth` থেকে `getAuth` named import করে নিতে হবে এবং `getAuth` কে firebaseApp দিয়ে initialize করে export করে দিতে হবে।
+
+`GoogleAuthProvider` এটিও `firebase/auth` থেকে named import করতে হবে। এটি import করার পরে instance বানিয়ে সেটি export করে দিতে হবে।
+
+```js copy showLineNumbers filename="src/firebase/firebaseInitialize.js" {3, 19, 22}
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_APP_ID,
+};
+
+// Initialize Firebase & export
+export const firebaseApp = initializeApp(firebaseConfig);
+
+// Initialize auth & export
+export const firebaseAuth = getAuth(firebaseApp);
+
+// Initialize GoogleAuthProvider & export
+export const googleAuthProvider = new GoogleAuthProvider();
+```
+
+#### Step 3
+
+এখন firebaseInitialize file থেকে `firebaseApp` named import করতে হবে যেটা আমরা আগের স্টেপে export করেছিলাম এবং `firebase/auth` থেকে `signInWithPopup` method named import করতে হবে।
+
+`signInWithPopup` এই মেথড 1st arg হিসেবে `firebaseAuth` 2nd arg এ `googleAuthProvider` দিলেই user account create করে দিবে। `signInWithPopup` user account create করার পরে response এর মধ্যে অনেক data return করে, আমরা সেই response এর `user` key তে created user এর তথ্য পাবো।
+
+```js showLineNumbers copy filename="src/firebase/firebaseUtility.js" {1-2, 8}
+import { signInWithPopup } from "firebase/auth";
+import { firebaseAuth, googleAuthProvider } from "./firebaseInitialize";
+
+/**
+ * Sign in with google
+ */
+export const signInWithGoogle = async () => {
+  const response = await signInWithPopup(firebaseAuth, googleAuthProvider);
+
+  return response.user;
+};
+```
+
+#### Step 4 & Final Step
+
+এখন আমাদেরকে আমাদের component এর মধ্যে এসে form submit করার সময় আগের স্টেপে বানাও login function এর মধ্যে `email` & `password` দিয়ে দিলেই কাজ হয়ে যাবে।
+
+```js copy showLineNumbers filename="LoginPage.jsx" {1, 8-18}
+import { signInWithGoogle } from "../firebase/firebaseUtility";
+
+const LoginPage = () => {
+  // handle form submission to register user
+  const handleFormSubmission = async (e) => {
+    e.preventDefault();
+
+    try {
+      const user = await signInWithGoogle();
+
+      console.log(user);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // return jsx code here
+};
+```
+
+</Steps>

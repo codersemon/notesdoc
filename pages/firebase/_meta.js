@@ -1,6 +1,7 @@
 const firebaseRootRoute = {
-    index: "Getting Started",
-    installation: "Installation",
-    crud: "CRUD"
-  };
-  export default firebaseRootRoute;
+  index: "Getting Started",
+  installation: "Installation",
+  authentication: "Authentication",
+  crud: "CRUD",
+};
+export default firebaseRootRoute;
