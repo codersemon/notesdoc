@@ -1,9 +1,4 @@
 const rootRoute = {
-  reactjs: "React JS",
-  "react-router-dom": "React Router DOM",
-  "tanstack-react-query": "Tanstack/React Query",
-  firebase: "Firebase",
-  axios: "Axios",
   contact: {
     title: "Contact",
     type: "page",
@@ -16,5 +11,11 @@ const rootRoute = {
     href: "https://emonkhan.me/about/",
     newWindow: true,
   },
+  reactjs: "React JS",
+  "react-router-dom": "React Router DOM",
+  "tanstack-react-query": "Tanstack/React Query",
+  firebase: "Firebase",
+  axios: "Axios",
+  "framer-motion": "Framer Motion"
 };
 export default rootRoute;

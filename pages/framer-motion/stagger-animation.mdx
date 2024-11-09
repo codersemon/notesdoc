@@ -1,0 +1,53 @@
+## Stagger animation
+
+Stagger animation বলতে প্রতিটা child element কে একটার পরে আরেকটা animation এর মাধ্যমে দেখানো। আমাদের কাছে যদি একটা লিস্ট থাকে, আর লিস্টের প্রতিটা আইটেম একটার পর আরেকটা animate করে আসতে থাকে, তাহলে সেটি অনেক বেশি সুন্দর দেখাবে।
+
+stagger animation বানানোর জন্য একটি variants নিতে হবে, যেটি parent এবং child উভয়কেই দিতে হবে। parent এর মধ্যে initial, animate, variants সবই দিতে হবে, কিন্তু child এর ক্ষেত্রে শুধুমাত্র variants দিতে হবে।
+
+variants object এর মধ্যে `transition: {staggerChildren: delay}` এখানে একটার পরে আরকেটা কতক্ষণ পরে আসবে সেই delay টা দিতে হবে।
+
+```js copy showLineNumbers {14, 24-26, 33}
+// dependencies
+import { motion } from "framer-motion";
+
+const childStaggerAnimation = {
+  initial: {
+    opacity: 0,
+    translateY: -10,
+  },
+  animate: {
+    opacity: 1,
+    translateY: 0,
+    transition: {
+      duration: 1,
+      staggerChildren: 0.3,
+    },
+  },
+};
+
+const Stagger = () => {
+  const items = ["Item 1", "Item 2", "Item 3", "Item 4"];
+  return (
+    <div className="container my-10">
+      <motion.ul
+        variants={childStaggerAnimation}
+        initial="initial"
+        animate="animate"
+        className="flex flex-col justify-start items-center"
+      >
+        {items.map((item, index) => (
+          <motion.li
+            key={index}
+            className="list-none my-2 bg-blue-400 inline-block px-10 py-2 rounded-md"
+            variants={childStaggerAnimation}
+          >
+            {item}
+          </motion.li>
+        ))}
+      </motion.ul>
+    </div>
+  );
+};
+
+export default Stagger;
+```

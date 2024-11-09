@@ -1,0 +1,62 @@
+## Hover & click animation
+
+Click & Hover এর উপরে নির্ভর করে আমরা ভিন্ন ভিন্ন animation দিতে পারি।
+
+### Hover animation
+
+hover করলে কোন animation দিতে চাইলে `whileHover` props এর মধ্যে animation property গুলো দিতে হবে।
+
+```js copy showLineNumbers {10-14}
+// dependencies
+import { motion } from "framer-motion";
+
+const ButtonAnimation = () => {
+  return (
+    <div className="container my-10">
+      <div className="flex gap-5">
+        <motion.button
+          className="bg-purple-500 text-white px-5 py-2 rounded-sm"
+          whileHover={{
+            scale: 1.1,
+            backgroundColor: "#9333EA",
+            transition: { duration: 0.3, ease: "easeInOut" },
+          }}
+        >
+          Hover Me
+        </motion.button>
+      </div>
+    </div>
+  );
+};
+
+export default ButtonAnimation;
+```
+
+### Click / Tap animation
+
+click / tap করার সময় কোন animation দেখাতে চাইলে `whileTap` props এর মধ্যে animation property গুলো দিতে হবে।
+
+```js copy showLineNumbers {10-13}
+// dependencies
+import { motion } from "framer-motion";
+
+const ButtonAnimation = () => {
+  return (
+    <div className="container my-10">
+      <div className="flex gap-5">
+        <motion.button
+          className="bg-purple-500 text-white px-5 py-2 rounded-sm"
+          whileTap={{
+            scale: 1.5,
+            transition: { duration: 0.3 },
+          }}
+        >
+          Click Me
+        </motion.button>
+      </div>
+    </div>
+  );
+};
+
+export default ButtonAnimation;
+```

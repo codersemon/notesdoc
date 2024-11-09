@@ -1,0 +1,31 @@
+## Key frames animation 
+আগের পর্বে আমরা যে এনিমেশন শিখেছি সেটার শুধুমাত্র শুরু আর শেষ বলে দেওয়া যেত। কিন্তু আমরা যদি চাই আমাদের animation ঠিক যতক্ষণ যাবত চলবে তার ০% এ একরকম হবে, ২৫% আরেকরকম, ৫০% আরকেরকম, ৭৫% আরকেরকম এবং ১০০% আরেকরকম হবে, তখন আমাদেরকে key frames animation use করতে হবে। আর এই timing percentage ইচ্ছামত নিয়ন্ত্রণ করা যাবে। 
+
+key-frame animation বানানোর জন্য `animate` props এর মধ্যে যে property এর animation করতে চাই সেটি array আকারে দিতে হবে। array এর মধ্যে যতগুলো item থাকবে সেটা দিয়ে 100 কে ভাগ করলে যে রেজাল্ট আসবে সেটাই হবে প্রতিটা item এর duration. যেমনঃ আমাদের animation duration হচ্ছে 2 seconds, array item 5 টা। 
+
+[আগের পর্বে](/framer-motion/simple-animation) আমরা যে animation বানিয়েছিলাম সেখানে `transition` এর জন্য dedicated props দিয়েছিলাম কিন্তু এখানে `animate` props এর মধ্যে ব্যবহার করেছি। আমরা দুভাবেই ব্যবহার করতে পারবো। 
+
+```js copy showLineNumbers {10-15}
+// dependencies
+import { motion } from "framer-motion";
+
+const KeyFramesAnimation = () => {
+  return (
+    <div className="container my-10">
+      <div>
+        <motion.div
+          className="w-36 h-36 bg-green-500"
+          animate={{
+            rotate: [40, 90, 100, 120, 180],
+            scale: [0.5, 0.7, 0.9, 1.1, 1.3],
+            borderRadius: [5, 20, 40, 70, 100],
+            transition: { duration: 2 },
+          }}
+        ></motion.div>
+      </div>
+    </div>
+  );
+};
+
+export default KeyFramesAnimation;
+```

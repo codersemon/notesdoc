@@ -1,0 +1,35 @@
+## Text motion
+
+Text motion animation খুব সহজেই দেওয়া যায় transition: duration & delay ব্যবহার করার মাধ্যমে।
+
+আমাদের যে text আছে সেটাকে `split()` method ব্যবহার করার মাধ্যমে array তে convert করে সেটার উপরে loop করতে হবে, আর প্রতিটা word কে motion এর মাধ্যমে initial, animate, transition দিতে হবে। এখানে `transition={{delay: index/20}}` এখানে delay এর value এর মাধ্যমে main কাজটা হবে। 
+
+```js copy showLineNumbers {5-6, 11-21}
+// dependencies
+import { motion } from "framer-motion";
+
+const TextMotionAnimation = () => {
+  const textString =
+    "Lorem ipsum dolor sit amet consectetur adipisicing elit. Deleniti tenetur sed hic incidunt ipsum. Doloribus ea a vero ab dolore.";
+
+  return (
+    <div className="container my-10">
+      <div>
+        {textString.split(" ").map((word, index) => (
+          <motion.span
+            key={index}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.2, delay: index / 20 }}
+            className="text-xl"
+          >
+            {word}{" "}
+          </motion.span>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default TextMotionAnimation;
+```

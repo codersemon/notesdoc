@@ -1,0 +1,47 @@
+import { Steps } from "nextra/components";
+
+## Simple Animation Adding
+
+এটি আমাদের প্রথম animation যেটা আমরা কোন component এ ব্যবহার করবো।
+
+<Steps>
+### Step 1 
+প্রথমে `framer-motion` package থেকে `motion` named import করে নিতে হবে।
+
+```js copy
+import { motion } from "framer-motion";
+```
+
+### Step 2 & Final Step
+
+এখন যে DOM এর উপরে animation apply করতে চাই সেটার আগে motion লাগিয়ে দিতে হবে।
+
+`initial` props এর মধ্যে একটি object হিসেবে property দিতে হবে। `CSS` এর যে যে property গুলোকে animate করানো যায়, সেগুলোই এখানে ব্যবহার করা যাবে। আর `initial` টি হচ্ছে যখন animation শুরু হবে তখন কি ডিজাইন থাকবে সেই ভেলু।
+
+`animate` props এর মধ্যে একটি object হিসেবে property দিতে হবে। initial থেকে শুরু হয়ে কি ডিজাইন পরিবর্তন দিয়ে animation শেষ হবে সেটাই এখানে দিতে হবে।
+
+`transition` props এর মধ্যে একটি object হিসেবে property দিতে হবে। এখানে animation কতক্ষণ ধরে চলবে, animation এর ধরণ কেমন হবে সেসব বলে দেওয়া যাবে। duration এর value হবে second এ। 
+
+```js copy showLineNumbers {8,13}
+// dependencies
+import { motion } from "framer-motion";
+
+const SimpleAnimation = () => {
+  return (
+    <div className="container my-10">
+      <div>
+        <motion.div
+          className="w-36 h-36 bg-green-500"
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: 1, scale: 1, rotate: -180 }}
+          transition={{ duration: 1 }}
+        ></motion.div>
+      </div>
+    </div>
+  );
+};
+
+export default SimpleAnimation;
+```
+
+</Steps>

@@ -1,0 +1,108 @@
+import { Callout } from "nextra/components";
+
+## Variants কি এবং কেন ব্যবহার করতে হয়?
+
+variants একটি `motion` এর একটি props যেটিতে আমরা animation এর সকল property অন্য কোন ফাইলে রেখে সেখান থেকে import করে ব্যবহার করতে পারি। এভাবে modular way তে কাজ করলে একই animation বার বার লিখার প্রয়োজন হবে না। আমরা একটা central file এ সব animation property define করে export করে দিলে বিভিন্ন component থেকে সহজেই ব্যবহার করতে পারবো।
+
+## Variants এর ব্যবহার পদ্ধতি
+
+নিচের component এর মধ্যে variants ব্যবহার করা হয়েছে। variants এর জন্য একটা object এর মধ্যে `initial` & `animate` এর জন্য সব property define করতে হবে। object টি যেখানে motion use করবো সেখানে `variants` props এর মধ্যে দিয়ে দিতে হবে। `initial` props এর মধ্যে motion এর জন্য define করা object এর মধ্যকার initial key দিতে হবে, আর `animate` props এর মধ্যে animate key দিতে হবে। তাহলেই কাজ শেষ হয়ে যাবে আমাদের।
+
+<Callout type="warning" emoji="⚠️">
+  variants এর object এর মধ্যকার initial & animate ভিন্ন নামেও হতে পারে তাতে
+  সমস্যা নেই। তবে, যে নামে object বানাবো সেটাই component এর `initial` &
+  `animate` props এর value তে দিতে হবে।
+</Callout>
+
+```js copy showLineNumbers {4-18, 25-27}
+// dependencies
+import { motion } from "framer-motion";
+
+const shapeAnimation = {
+  initial: {
+    opacity: 0,
+    scale: 0,
+    y: "-10vh",
+  },
+  animate: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      duration: 1,
+    },
+  },
+};
+
+const VariantAnimation = () => {
+  return (
+    <>
+      <motion.div
+        className="w-36 h-36 bg-blue-400"
+        variants={shapeAnimation}
+        initial="initial"
+        animate="animate"
+      />
+    </>
+  );
+};
+
+export default VariantAnimation;
+```
+
+## Child component এ variants এর ব্যবহার
+
+parent component এর variants object key আর child component এর variants object key একই হয়, তাহলে শুধুমাত্র parent component এর মধ্যে `initial` & `animate` props দিলেই হয়ে যাবে, তবে child এর ব্যবহার করলেও কোন সমস্যা নেই।
+
+```js copy showLineNumbers {2, 7, 18, 23, 39-41, 45}
+const shapeAnimation = {
+  initial: {
+    opacity: 0,
+    scale: 0,
+    y: "-10vh",
+  },
+  animate: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      duration: 1,
+    },
+  },
+};
+
+const childShape = {
+  initial: {
+    x: -10,
+    y: -5,
+  },
+  animate: {
+    x: -20,
+    y: -20,
+    transition: {
+      duration: 1,
+      delay: 0.3,
+    },
+  },
+};
+
+const VariantAnimation = () => {
+  return (
+    <>
+      <motion.div
+        className="w-36 h-36 bg-blue-400"
+        variants={shapeAnimation}
+        initial="initial"
+        animate="animate"
+      >
+        <motion.div
+          className="w-16 h-16 rounded-full border-2 border-white bg-yellow-400"
+          variants={childShape}
+        />
+      </motion.div>
+    </>
+  );
+};
+
+export default VariantAnimation;
+```

@@ -1,0 +1,49 @@
+## Scroll Reveal Effect
+
+কোন html element view এর মধ্যে আসলে সেটা উপরে animation দেওয়ার জন্য `whileInView` এই props এর মধ্যে animation property গুলো দিতে হবে। `whileInView` ব্যবহার করতে হলে `initial` props ও ব্যবহার করতে হবে।
+
+`viewport` এই props এর মধ্যে `once=false` দিলে view এর বাইরে গিয়ে যতবার view এর মধ্যে আসবে ততবারই animation হবে। আর false দিলে শুধুমাত্র একবার animation হবে।
+
+```js copy showLineNumbers {21-24}
+// dependencies
+import { motion } from "framer-motion";
+
+const devTerms = [
+  { id: 1, term: "API" },
+  { id: 2, term: "Frontend" },
+  { id: 3, term: "Backend" },
+  { id: 4, term: "Full Stack" },
+  { id: 5, term: "REST" },
+  { id: 6, term: "Database" },
+  { id: 7, term: "Middleware" },
+  { id: 8, term: "DevOps" },
+  { id: 9, term: "Version Control" },
+  { id: 10, term: "CLI" },
+];
+
+const Box = ({ text }) => {
+  return (
+    <motion.div
+      className="w-2/3 h-80 bg-green-500 my-6 flex justify-center items-center rounded-md"
+      initial={{ opacity: 0, x: "-100vh" }}
+      whileInView={{ opacity: 1, x: 0 }}
+      transition={{ duration: 1, delay: 0.1 }}
+      viewport={{ once: false }}
+    >
+      {text}
+    </motion.div>
+  );
+};
+
+const ScrollRevealEffect = () => {
+  return (
+    <div className="container my-10 flex justify-center flex-col items-center">
+      {devTerms?.map((item) => (
+        <Box key={item?.id} text={item?.term} />
+      ))}
+    </div>
+  );
+};
+
+export default ScrollRevealEffect;
+```
