@@ -2,9 +2,7 @@
 import nextra from "nextra";
 
 const nextConfig = {
-  images: {
-    remotePatterns: [],
-  },
+  reactStrictMode: process.env.CLEAR_CACHE === "true",
 };
 
 const withNextra = nextra({
