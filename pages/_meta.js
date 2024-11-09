@@ -2,7 +2,6 @@ const rootRoute = {
   reactjs: "React JS",
   "react-router-dom": "React Router DOM",
   "tanstack-react-query": "Tanstack/React Query",
-  nextjs: "Next JS",
   firebase: "Firebase",
   axios: "Axios",
   contact: {
