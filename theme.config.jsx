@@ -23,6 +23,7 @@ const themeConfig = {
   sidebar: {
     defaultMenuCollapseLevel: 1,
     autoCollapse: true,
-  }
+  },
+  docsRepositoryBase: 'https://github.com/codersemon/notesdoc/tree/main'
 };
 export default themeConfig;
