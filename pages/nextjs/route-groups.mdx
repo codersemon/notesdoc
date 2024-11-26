@@ -1,0 +1,41 @@
+{/* dependencies */}
+import { FileTree } from 'nextra/components'
+
+## Why Route Groups
+
+আমরা app folder এর মধ্যে similar route গুলো একই folder এর মধ্যে রেখে ভালোভাবে organize করতে পারি। কিন্তু আমরা জানি যে app folder এর কোন folder create করলেই সেটি route path হিসেবে কাজ করে, তাই এই default behaviour prevent করার জন্যই route groups করা হয়ে থাকে। নিচের file structure এ দেখা যাচ্ছে dashboard folder এর মধ্যে settings folder এবং analytics folder রয়েছে। তাই settings route access করতে হলে full url hobe `domain/dashboard/settings`। settings route এর পূর্বে dashboard route যুক্ত হয়ে যাচ্ছে। কিন্তু যদি সরাসরি settings route করতে চাই, তখনই route groups help করবে।
+
+<FileTree>
+  <FileTree.Folder name="app" defaultOpen>
+    <FileTree.Folder name="dashboard" defaultOpen>
+      <FileTree.Folder name="settings" defaultOpen>
+        <FileTree.File name="page.js" />
+      </FileTree.Folder>
+      <FileTree.Folder name="analytics" defaultOpen>
+        <FileTree.File name="page.js" />
+      </FileTree.Folder>
+    </FileTree.Folder>
+    <FileTree.File name="layout.js" />
+    <FileTree.File name="page.js" />
+  </FileTree.Folder>
+</FileTree>
+
+## Usages of Route Groups
+
+যে folder কে group করতে চাই সেটা শুধুমাত্র parenthesis দিয়ে মুড়িয়ে দিলেই হয়ে যাবে। নিচের উদাহরণে দেখা যাচ্ছে dashboard folder কে parenthesis দিয়ে wrap করে দেওয়া হয়েছে। এর ফলে এই dashboard আর url এ দেখা যাবে না। settings page access করা যাবে এভাবে `domain/settings`
+
+<FileTree>
+  <FileTree.Folder name="app" defaultOpen>
+    <FileTree.Folder name="(dashboard)" defaultOpen>
+      <FileTree.Folder name="settings" defaultOpen>
+        <FileTree.File name="page.js" />
+      </FileTree.Folder>
+      <FileTree.Folder name="analytics" defaultOpen>
+        <FileTree.File name="page.js" />
+      </FileTree.Folder>
+    </FileTree.Folder>
+    <FileTree.File name="layout.js" />
+    <FileTree.File name="page.js" />
+  </FileTree.Folder>
+</FileTree>
+

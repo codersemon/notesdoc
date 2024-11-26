@@ -1,0 +1,73 @@
+{/* dependencies */}
+import { Callout } from "nextra/components";
+
+## Defining Routes, Pages & Layouts
+
+## Terminology
+
+URL এর মধ্যে Domain এর পরের অংশকে `Path` বলা হয়।
+সম্পূর্ণ `path` এর মধ্যকার প্রতিটা slash এর পরবর্তী যে route থাকে সেগুলোকে এক একটা `Segment` বলা হয়ে থাকে।
+
+![Terminology](../../public/images/nextjs-4.png);
+
+## Root Route
+
+app directory root route হিসেবে কাজ করে। এই root router এর জন্য layout.js & page.js files required. এই layout.js সব sub router জন্য default layout হিসেবে কাজ করবে।
+
+## layout.js
+
+এই ফাইলের মধ্যে RootLayout নামে একটি component default export করতে হবে। RootLayout নামেই component নিতে হবে এমন কোন বাধ্যবাধকতা নেই, তবে ফাইলের নাম অবশ্যই `layout.js / .jsx / .tsx` হতে হবে । আর component এর মধ্যে children props নিয়ে সেটি body এর মধ্যে use করতে হবে। এই children এর মাধ্যমেই page.js সহ অন্য যত sub-route হবে সবকিছুর page.js render হবে।
+
+<Callout type="info" emoji="ℹ️">
+  root route এ যে layout.js file থাকবে সেটার component এর মধ্যে অবশ্যই html &
+  body tag ব্যবহার করতে হবে। কেননা, nextjs এ react এর মত আলাদা কোন `index.html`
+  file নেই যেটার মাধ্যমে `html` এর structure আনতে পারবে।
+</Callout>
+
+```js copy showLineNumbers filename="app/layout.js"
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
+}
+```
+
+## page.js
+
+এই ফাইলের মধ্যে প্রতিটা segment এর content component এর মাধ্যমে load হবে।
+
+প্রতিটা segment এ শুধুমাত্র একটিই `page.js` ফাইল থাকবে। এই ফাইলটি ঐ respective segment এর জন্য render হবে। এই ফাইলের নাই অবশ্যই `page.js / jsx / tsx` দিতে হবে, তবে component যেকোন নামে default export করা যাবে।
+
+```js showLineNumbers filename="app/page.js" copy
+const HomePage = () => {
+  return <div>HomePage</div>;
+};
+
+export default HomePage;
+```
+
+### metadata
+
+SEO করার জন্য এবং প্রতিটা পেজের title, description ইত্যাদি ব্যবহার করার জন্য page.js থেকে metadata object named export করতে হবে।
+
+```js copy showLineNumbers filename="app/page.js" {1-4}
+export const metadata = {
+  title: "Homepage",
+  description: "Nextjs learning homepage",
+};
+
+const HomePage = () => {
+  return <div>HomePage</div>;
+};
+
+export default HomePage;
+```
+
+## template.js 
+template.js file layout.js file এর মত layout share করে থাকে। template.js file প্রতিটা path change এর জন্য re-render হয়, কিন্তু layout.js কোন re-render হয়না। root এর জন্য layout.js file required কিন্তু অন্য সব nested route এর প্রতিটা path এর জন্য layout.js required না।  
+
+## layout.js `vs` template.js
+
+আমরা যদি layout.js ব্যবহার করি তাহলে re-render হবে না route এর মধ্যে navigate করলেও। কিন্তু যদি এমনটা প্রয়োজন হয় যে route এর মধ্যে navigate করার সময় layout component re-render করতে হবে, তাহলে template.js file এর মধ্যে layout এর component রাখতে হবে। সেক্ষেত্রে template.js এর মধ্যকার code re-render হবে।

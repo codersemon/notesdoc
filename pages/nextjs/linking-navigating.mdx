@@ -1,0 +1,144 @@
+{/* dependencies */}
+import { Callout } from "nextra/components";
+
+## Linking and Navigating
+
+প্রতিটা প্রজেক্টেই navigation খুবই জরুরী একটি বিষয়। কেননা, navigation ছাড়া কোন application কল্পনায় করা প্রায় অসম্ভব।
+
+<span className="flex mt-2 font-bold">
+  Nextjs routes এর মধ্যে navigate করার জন্য ৪ ধরনের পদ্ধতি আছে। সেগুলো হচ্ছেঃ
+</span>
+
+1. `<Link>` component
+2. `useRouter` hook (<span className="text-fuchsia-500">client component</span>)
+3. `redirect` function (<span className="text-fuchsia-500">server component</span>)
+4. `Native History` API
+
+## 1. Link component usages
+
+react এ href এর জন্য যেমন react-router-dom package থেকে link component ব্যবহার করার প্রয়োজন হতো, nextjs এর তেমন কোন package এর প্রয়োজন নেই। next/link থেকে Link import করে নিলেই হয়ে যাবে। আর href হিসেবে html এর default href ব্যবহার করলেই হবে।
+
+<Callout type="info" emoji="ℹ️">
+  html এ a tag এর মধ্যে যে সকল attributes use করা যায়, সবই এই `Link` component
+  এর মধ্যে ব্যবহার করা যাবে।
+</Callout>
+
+```js copy showLineNumbers {2, 7}
+// dependencies
+import Link from "next/link";
+
+const HomePage = () => {
+  return (
+    <div className="container">
+      <Link href="/">Home</Link>
+    </div>
+  );
+};
+
+export default HomePage;
+```
+
+[🔗 Reference](https://nextjs.org/docs/app/api-reference/components/link)
+
+### 1.1 Prefetch Enable / Disable
+
+nextjs smartly prefetch handle করে থাকে। client এর viewport এর মধ্যে যতগুলো link থাকে সবগুলোই ভিতরে ভিতরে fetch করে রেখে দেয়। এর ফলে client যদি link গুলোর মধ্যে navigate করে তাহলে অনেক faster browse করতে পারবে। আর এটা nextjs Link component এর default feature. তবে, অনেক সময় বিভিন্ন page অনেক বেশি heavy হতে পারে, এগুলোও যদি prefetch করে রাখা হয় তাহলে inital loading time অনেক বেড়ে যেতে পারে। তাই কিছু কিছু ক্ষেত্রে prefetch disable করে রাখতে হবে। prefetch disable করতে হলে prefetch props false করে দিতে হবে।
+
+```js copy showLineNumbers {2, 7}
+<Link href="/" prefetch={false}>
+  Home
+</Link>
+```
+
+[🔗 Reference](https://nextjs.org/docs/app/api-reference/components/link#prefetch)
+
+### 1.2 Active Link
+
+কোন path বা url এ client আছে সেটার উপর নির্ভর করে ঐ Link -এ active class বা ভিন্ন ডিজাইন দিয়ে রাখা হয়। তাহলে client সহজেই বুঝতে পারে সে এখন কোথায় আছে। এটি করার জন্য অবশ্যই <span className="text-fuchsia-500">Link component টিকে [client side render](/nextjs/use-client) করাতে হবে</span>। কেননা, বর্তমান URL path পাওয়া জন্য next/navigation থেকে usePathname hook ব্যবহার করতে হবে, আর hook client component ছাড়া কাজ করবে না। নিচের উদাহরণে usePathname hook ব্যবহার করার জন্য প্রথমে Link Component কে import করে সেটাকে অন্য একটা CustomLink client component বানানো হচ্ছে। এই component এর মধ্যে usePathname hook থেকে পাওয়া pathname কে href এর সাথে compare করা হচ্ছে। যদি true হয় তাহলে text-fuchsia-500 করবে, নয়তো default return করবে।
+
+- 2 নং লাইনে Link component কে `use client` এর মাধ্যমে client side rendering করানো হচ্ছে।
+- 9 নং লাইনে `usePathname` hook এর মাধ্যমে pathname নেওয়া হচ্ছে।
+- 12 নং লাইনে hook থেকে পাওয়া pathname এবং props এ আসা href এর সাথে compare করা হচ্ছে। যদি active pathname & href একই হয়, তখন true আর একই না হলে false return করবে, এই varible এর উপরে নির্ভর করেই active route এর decision নেওয়া যাবে।
+- 15 নং লাইনে `className` এর value ১২ নং লাইনে পাওয়া varible এর উপর নির্ভর করে ভিন্ন ভিন্ন css apply করানো যাবে।
+
+```js copy showLineNumbers filename="CustomLink.js" {2, 9, 12, 15}
+// use client side rendering
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+const CustomLink = ({ children, href, ...rest }) => {
+  // get pathname
+  const pathname = usePathname();
+
+  // check active path
+  const isActive = pathname === href;
+
+  return (
+    <Link href={href} {...rest} className={isActive ? "text-fuchsia-500" : ""}>
+      {children}
+    </Link>
+  );
+};
+
+export default CustomLink;
+```
+
+[🔗 Reference](https://nextjs.org/docs/app/api-reference/components/link#checking-active-links)
+
+### 1.3 Hashlink Scrolling
+
+href এর মধ্যে যদি কোন hash দিয়ে যে value দেওয়া হয় সেই value তে যদি কোন id থাকে default ভাবে সেখানে scroll করবে (আমরা যেটাকে hashLink বলে থাকি)।
+
+```js copy
+<Link href="/service/#contact">Contact</Link>
+```
+
+<Callout>
+  যদি Hashlink বন্ধ করতে চাই তাহলে Link Component এর scroll props false করে দিতে
+  হবে।
+</Callout>
+
+```js copy
+<Link href="/service/#contact" scroll={false}>
+  Contact
+</Link>
+```
+
+[🔗 Reference](https://nextjs.org/docs/app/api-reference/components/link#scrolling-to-an-id)
+
+## 2. useRouter Usages
+
+যদি কোন function এর মাধ্যমে routing করতে চাই, তখন [client side render](/nextjs/use-client) করতে হবে আর ঐ client component এর মধ্যে useRouter hook এর মাধ্যমে navigate করা যাবে। next/navigation থেকে useRouter named import করে নিতে হবে। এরপরে function এর মধ্যে ঐ hook এর push method ব্যবহার করে url দিতে হবে। <span className="text-fuchsia-500">এটি client component</span>
+
+- 1 নং লাইনে component কে client side rendering directive এর মাধ্যমে client side render করা হচ্ছে।
+- 7 নং `next/navigation` থেকে useRouter named import কৃত hook initialized করা হয়েছে। <span className="text-red-500">next/router থেকে useRouter hook import করা যাবে না, এটি nextjs v12 পর্যন্ত কাজ করতো।</span>
+- 9 নং লাইনে `router.push(path)` এর মাধ্যমে অন্য route এ navigate করা হচ্ছে।
+
+```js copy showLineNumbers filename="" {1, 7, 9}
+"use client";
+
+import { useRouter } from "next/navigation";
+
+const ButtonLink = ({ children, path }) => {
+  // init navigation router
+  const router = useRouter();
+
+  return <button onClick={() => router.push(path)}>{children}</button>;
+};
+
+export default ButtonLink;
+```
+
+[🔗 Reference](https://nextjs.org/docs/app/building-your-application/routing/linking-and-navigating#userouter-hook)
+
+## 3. redirect Usages
+
+এটি server side এ কাজ করবে। সার্ভার component এর মধ্যে থেকে navigate করার জন্য এই redirect আমাদেরকে সাহায্য করবে।
+
+[🔗 Reference](https://nextjs.org/docs/app/building-your-application/routing/linking-and-navigating#redirect-function)
+
+## 4. Using the native History API
+
+[🔗 Reference](https://nextjs.org/docs/app/building-your-application/routing/linking-and-navigating#using-the-native-history-api)

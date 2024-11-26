@@ -1,0 +1,87 @@
+{/* dependencies */}
+import { Callout, FileTree } from 'nextra/components'
+
+## Error handling
+
+Application এ যদি error handle না করা হয় তাহলে পুরো application crash করবে, আর যদি সঠিকভাবে error handle করা হয়, তাহলে যেখানে error হবে শুধুমাত্র সেই অংশ ছাড়া বাকি সব run করানো সম্ভব হবে।
+
+<Callout>
+  error handler file এর মধ্যকার component অবশ্যই `use client` ব্যবহার করার
+  মাধ্যমে client side render করতে হবে।
+</Callout>
+
+## error.js
+
+error handle করার জন্য error.js file ব্যবহার করতে হবে। যেটার মাধ্যমে যেকোন error handle করা যাবে। error component অবশ্যই client side render করাতে হবে। কেননা, error client এর মধ্যেই দেখাতে হবে। যে route segment এর error handle করতে চাই সেই segment folder এর মধ্যে error.js file নিতে হবে।
+
+নিচের file structure & code এর মধ্যে যা দেখতে পারছি সেটার মাধ্যমে Settings segment এর page.js এর মধ্যে কোন error হলে ঐ error.js file দিয়ে catch করা যাবে। error.js file এর মধ্যে যে component বানানো হবে সেটা props এর মধ্যে error object এবং reset function পাবে। error object এর error.message এর মধ্যে error message পাওয়া যাবে।
+
+আর reset function এর মাধ্যমে Retry করানো যাবে, এটি দিয়ে যদি কোন temporary error হয় সেটা recover করা যাবে আর permanent error হলে সেটা recover করা যাবে না।
+
+<FileTree>
+  <FileTree.Folder name="app" defaultOpen>
+    <FileTree.Folder name="dashboard" defaultOpen>
+      <FileTree.Folder name="settings" defaultOpen>
+        <FileTree.File name="error.js" />
+        <FileTree.File name="layout.js" />
+        <FileTree.File name="page.js" />
+      </FileTree.Folder>
+    </FileTree.Folder>
+    <FileTree.File name="layout.js" />
+    <FileTree.File name="page.js" />
+  </FileTree.Folder>
+</FileTree>
+
+```js copy showLineNumbers filename="app/dashboard/settings/error.js" {}
+"use client";
+
+const HeavyErrorHandler = ({ error, reset }) => {
+  return (
+    <div className="container">
+      {error?.message}
+      <br />
+
+      <button onClick={() => reset()}>Try again</button>
+    </div>
+  );
+};
+
+export default HeavyErrorHandler;
+```
+
+<Callout>
+
+উপরে যে file structure দেখতে পারছি সেটা শুধুমাত্র ঐ segment এর page.js error catch করতে পারবে। যদি কোন layout.js থাকে সেটার মধ্যকার কোন error catch করতে পারবে না। ঐ segment এর layout.js error catch করতে চাই তাহলে ঐ segment parent এর মধ্যে error.js file নিতে হবে। যেমনঃ আমরা চাইলে dashboard এর মধ্যে error.js file রাখতে পারি কিংবা root directory তেও error.js রাখতে পারি।
+
+</Callout>
+
+## global-error.js
+
+আমরা আগের স্টেপেই শিখেছি layout.js এর error catch করতে হলে parent এর মধ্যে error.js file নিতে হবে। কিন্তু RootLayout এর তো কোন parent নেই। তাই RootLayout এর error catch করার জন্য global-error.js ব্যবহার করতে হবে। এই global-error component ঐ error component মত একই হবে। তবে, এখানে আমাদেরকে html & body tag দিয়ে দিতে হবে। কেননা, html & body tag render হয় RootLayout থেকে, কিন্তু RootLayout এ যদি কোন error হয় তখন সেটি render না হয়ে global-error.js file render হবে শুধুমাত্র।
+
+```js copy showLineNumbers filename="app/global-error.js" {}
+"use client";
+
+const GlobalErrorHandler = ({ error, reset }) => {
+  return (
+    <html>
+      <body>
+        <div className="container">
+          {error?.message}
+          <br />
+
+          <button onClick={() => reset()}>Try again</button>
+        </div>
+      </body>
+    </html>
+  );
+};
+
+export default GlobalErrorHandler;
+```
+
+<Callout type="info">
+  global-error.js file যেন ব্যবহার না করা লাগে সেভাবে application বানানোর চেষ্টা
+  করতে হবে। যদি, একদমই সম্ভব না হয়; শুধুমাত্র তখনই global-error.js file ব্যবহার
+  করা উচিত।
+</Callout>

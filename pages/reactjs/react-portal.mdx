@@ -1,0 +1,119 @@
+## React Portal
+
+Modal, Popovers, Tooltip ইত্যাদি যখন react project এ ব্যবহার করি তখন DOM Nodes গুলো DOM এর কোথায় append হবে সেটা আমরা নির্ধারণ করে দিতে পারি না। এতে UI তে unexpected behavior হতে পারে। যেমনঃ কোন একটা div tag এর overflow:hidden করে দেওয়ার পরে সেই div এর মধ্যেই যদি modal/popovers/tooltip দেখাতে চাই সেটা z-index দিয়েও দেখানো সম্ভব না। কিন্তু আমরা যদি modal/popovers/tooltip এগুলোর DOM Nodes গুলো body tag বা আমাদের ইচ্ছামত যেকোন Node এর মধ্যে রেখে দিতে পারি, তাহলে overflow:hidden দেওয়ার পরেও সেই modal/popovers/tooltip ইচ্ছামত দেখাতে পারবো। আর এই ইচ্ছামত স্থানে DOM Nodes রাখতেই React Portal আমাদেরকে সাহায্য করে থাকে।
+
+## React Portal ব্যবহার করার পদ্ধতিঃ
+
+`react-dom` package থেকে `createPortal` method named import করে নিতে হবে। createPortal method দুইটি arguments নিয়ে থাকে; ১ম টিতে Component দিতে হবে যেটি আমরা DOM এর নির্দিষ্ট স্থানে দিতে চাই, ২য় arg এ dom element selector দিতে হবে; নিচে body tag এর মধ্যে `Modal` কে render করা হয়েছে। আমরা যদি অন্য কোন element এর মধ্যে render করতে চাই তাহলে সেটা select করে দিতে হবে। যেমনঃ document.getElementById() বা querySelector এগুলো ব্যবহার করতে পারি।
+
+৩০ নম্বর লাইনে `role="dailog" aria-modal="true"` এগুলো ব্যবহার করার ফলে screen reader গুলো এগুলো বুঝতে পারবে, ফলে আমাদের application টি accesibility এর জন্য রেডি থাকবে।
+
+```js copy showLineNumbers {3, 19-22, 30}
+// dependencies
+import { useState } from "react";
+import { createPortal } from "react-dom";
+
+const SimpleComponent = () => {
+  const [showModal, setShowModal] = useState(false);
+
+  return (
+    <div className="container my-10">
+      <div className="my-3 border w-96 h-56 rounded-md shadow-md flex flex-col items-center p-2 gap-y-2 relative overflow-hidden">
+        <button
+          className="bg-teal-400 px-5 py-2 rounded-md text-white hover:bg-teal-500"
+          onClick={() => setShowModal((prev) => !prev)}
+        >
+          Toggle Modal
+        </button>
+
+        {showModal &&
+          createPortal(
+            <Modal onClose={() => setShowModal(false)} />,
+            document.body
+          )}
+      </div>
+    </div>
+  );
+};
+
+const Modal = ({ onClose }) => {
+  return (
+    <div
+      className="bg-fuchsia-300 w-96 text-center h-[500px] z-50 absolute top-10 right-0"
+      role="dailog"
+      aria-modal="true"
+    >
+      <h1>Modal</h1>
+
+      <button className="px-4 py-2 rounded-md bg-red-400" onClick={onClose}>
+        Close
+      </button>
+    </div>
+  );
+};
+
+export default SimpleComponent;
+```
+
+### Reusable Component
+
+```js copy showLineNumbers filename="Portal.jsx" {}
+import { useEffect } from "react";
+import { createPortal } from "react-dom";
+
+const Portal = ({ mountElementID, children }) => {
+  // if props passed then use othersize add node inside body tag
+  const mountElement = mountElementID
+    ? document.getElementById(mountElementID)
+    : document.body;
+
+  // create div tag inside mountElement
+  const elementDiv = document.createElement("div");
+
+  // append elementDiv inside mounting element
+  useEffect(() => {
+    mountElement.appendChild(elementDiv);
+
+    return () => mountElement.removeChild(elementDiv);
+  }, [elementDiv, mountElement]);
+
+  return createPortal(children, elementDiv);
+};
+
+export default Portal;
+```
+
+```js showLineNumbers copy {11-13}
+<div className="my-3 border w-96 h-56 rounded-md shadow-md flex flex-col items-center p-2 gap-y-2 relative overflow-hidden">
+  <button
+    className="bg-teal-400 px-5 py-2 rounded-md text-white hover:bg-teal-500"
+    whileTap={{ scale: 0.9 }}
+    onClick={() => setShowModal((prev) => !prev)}
+  >
+    Toggle Modal
+  </button>
+
+  {showModal && (
+    <Portal mountElementID="box">
+      <Modal onClose={() => setShowModal(false)} />
+    </Portal>
+  )}
+</div>
+```
+
+```js copy showLineNumbers filename="index.html" {11}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + React</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <div id="box"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+```

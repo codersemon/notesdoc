@@ -1,0 +1,24 @@
+## Client side rendering
+
+nextjs by default app folder এর মধ্যকার সবকিছুই server side render করে থাকে। আর এই server sider render এর যেমন কিছু সুবিধা আছে আবার তেমন অসুবিধাও আছে। যেমন, SSR করার ফলে কোন hook কাজ করবে না, তাই কোন hook ব্যবহার করতে হলে অবশ্যই component কে client side render করাতে হবে।
+
+## use client এর ব্যবহার
+
+কোন component কে client side render করার জন্য ফাইলের একদম শুরুতে শুধুমাত্র “use client” লিখে দিলেই সেটি CSR হিসেবে কাজ করবে।
+
+```js copy showLineNumbers {2}
+// use client side rendering
+"use client";
+
+import Link from "next/link";
+
+const CustomLink = ({ children, href, ...rest }) => {
+  return (
+    <Link href={href} {...rest}>
+      {children}
+    </Link>
+  );
+};
+
+export default CustomLink;
+```

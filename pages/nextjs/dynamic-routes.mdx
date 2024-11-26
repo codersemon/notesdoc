@@ -1,0 +1,115 @@
+{/* dependencies */}
+import { FileTree, Steps } from 'nextra/components'
+
+## Dynamic Routes
+
+যখন কি কি segment হবে সেটা আমাদের জানা থাকবেনা, data এর উপরে নির্ভর করে segment বানাতে হবে; তখন এই Dynamic Routes feature প্রয়োজন হবে।
+আমরা চাইল request time এ dynamically data fetch করে দেখাতে পারি, কিংবা আমাদের কাছে যদি জানা থাকে কি কি data আছে সেটার মাধ্যমেও prerender করে রাখতে পারি।
+
+## Simple Dynamic Route
+
+<Steps>
+### Step 1
+প্রথমে যে parameter দিয়ে dynamic param ধরতে চাই সেটি square bracket এর মধ্যে দিয়ে একটি route folder বানাতে হবে। নিচের উদাহরণে id parameter এর জন্য একটি router folder বানানো হয়েছে। আমাদের উদ্দেশ্য হচ্ছে /blog/id এটার মাধ্যমে single blog page বানানো তাই blog/[id] নেওয়া হয়েছে।
+
+<FileTree>
+  <FileTree.Folder name="app" defaultOpen>
+    <FileTree.Folder name="blog" defaultOpen>
+    <FileTree.Folder name="[id]" defaultOpen>
+        <FileTree.File name="page.js" />
+    </FileTree.Folder>
+        <FileTree.File name="page.js" />
+    </FileTree.Folder>
+    <FileTree.File name="layout.js" />
+    <FileTree.File name="page.js" />
+
+  </FileTree.Folder>
+</FileTree>
+
+### Step 2
+
+এবারে dynamic route folder এর মধ্যে page.js file নিতে হবে। যেখানে params props এর মাধ্যমে id param এর value access করা যাবে। নিচের উদাহরণে id param destructure করে নেওয়া হয়েছে। এখন এই id param এর উপরে ভিত্তি করে প্রয়োজনীয় কাজ করা যাবে।
+
+```js copy showLineNumbers filename="app/blog/[id]/page.js" {3, 5}
+import { blogs } from "@/data/blogs";
+
+const BlogSinglePage = ({ params }) => {
+  // get blog id
+  const { id } = params;
+
+  // get single blog
+  const blog = blogs.find((item) => item?.id == id);
+
+  return (
+    <div className="container">
+      <h1 className="text-2xl">{blog?.title}</h1>
+      <p>{blog?.body}</p>
+    </div>
+  );
+};
+
+export default BlogSinglePage;
+```
+
+</Steps>
+
+[🔗 Reference](https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes)
+
+## Catch-all Segments Dynamic Route
+
+dynamic route বানানোর জন্য folder name [id] এভাবে দিয়ে থাকি। কিন্তু এতে শুধুমাত্র একটি param catch করা যায়। কিন্তু যদি একাধিক params catch করতে চাই তাহলে [...id] এভাবে folder name দিতে হবে। তাহলে যতগুলো params আসুক না কেন সব array আকারে catch করা যাবে।
+
+যেমনঃ আগের স্টেপে যেটা শিখেছিলাম সেটাতে শুধুমাত্র blog এর পরে একটা segment catch করা যাবে, অর্থাৎ, blog/something কিন্তু URL এ যদি blog/something/something2/something3 এভাবে দিলে ১ম something এর পরে আর কিছুই catch করা যাবে না। কিন্তু, আমরা যদি dynamic route folder এর নামের আগে যদি ৩টা dot add করে দিই, তাহলে যতগুলো segment আসুক না কেন সব catch করা সম্ভব হবে। তবে এক্ষেত্রে আগের মত just destructure করলেই হবে না, এবারে id তে array আকারে segment গুলো পাওয়া যাবে। যদি URL এ এটি দিই `http://localhost:5270/blog/1/5644` তাহলে এভাবে id পাওয়া যাবে `id: [ '1', '5644' ]`
+
+<FileTree>
+  <FileTree.Folder name="app" defaultOpen>
+    <FileTree.Folder name="blog" defaultOpen>
+    <FileTree.Folder name="[...id]" defaultOpen>
+        <FileTree.File name="page.js" />
+    </FileTree.Folder>
+        <FileTree.File name="page.js" />
+    </FileTree.Folder>
+    <FileTree.File name="layout.js" />
+    <FileTree.File name="page.js" />
+
+  </FileTree.Folder>
+</FileTree>
+
+[🔗 Reference](https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes#catch-all-segments)
+
+## Optional Catch-all Segments Dynamic Route
+
+dynamic route [[...id]] এভাবে দিলে path param না থাকলেও param ছাড়া main url টা load হবে। যেমন আমার এখানে প্রয়োজন হচ্ছে /category/categoryName এখানে categoryName দিলে সেই category এর সব products load হবে। আর যদি কোন category না দেওয়া হয় তাহলে all products load হবে। optional catch all segment এর মাধ্যমে সেটা সহজেই করা গেছে।
+
+[🔗 Reference](https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes#optional-catch-all-segments)
+
+## Generate Dynamic Routes to Static Page
+
+আমরা ইতিমধ্যেই জেনেছি dynamic routes always request time এ সার্ভার থেকে request করে আনে। কিন্তু, আমরা যদি নিশ্চিত থাকি আমাদের কিছু নির্ধারিত dynamic page থাকবে, তাহলে সেই পেজগুলো Static generate করে রাখতে পারি। ফলে, request time এ সেটি সার্ভার থেকে request করে আনার প্রয়োজন হবে না, ফলে application অনেক বেশি optimized হয়ে যাবে।
+
+Dynamic routes গুলো Static generate করে রাখার জন্য `generateStaticParams` function named export করে দিতে। আর এই function এর মধ্য থেকে array of object return করতে হবে, যেখানে, object key: value pair দিতে হবে। key তে params আর value তে যে যে dynamic segment হবে সেগুলো দিতে হবে।
+
+```js copy showLineNumbers filename="app/blog/[id]/page.js" {3-5, 9}
+import { blogs } from "@/data/blogs";
+
+export function generateStaticParams() {
+  return blogs?.map((item) => ({ id: item?.id.toString() }));
+}
+
+const BlogSinglePage = ({ params }) => {
+  // get blog id
+  const { id } = params;
+
+  // get single blog
+  const blog = blogs.find((item) => item?.id == id);
+
+  return (
+    <div className="container">
+      <h1 className="text-2xl">{blog?.title}</h1>
+      <p>{blog?.body}</p>
+    </div>
+  );
+};
+
+export default BlogSinglePage;
+```

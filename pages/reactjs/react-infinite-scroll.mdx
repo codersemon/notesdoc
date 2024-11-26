@@ -1,0 +1,76 @@
+## React Infinite Scroll
+
+react project এ infinite scroll implement করার জন্য যে server থেকে data fetch করবো সেটায় অবশ্যই pagination system handle করার option থাকতে হবে। কেননা, infinite scroll এ মূলত paginate করেই data fetch করানো হয়।
+
+```js copy showLineNumbers {}
+import { useEffect, useRef, useState } from "react";
+import ProductCard from "../components/ProductCard";
+
+// productPerPage
+const productsPerPage = 10;
+const InfiniteScroll = () => {
+  const [products, setProducts] = useState([]);
+  const [hasProduct, setHasProduct] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
+  const loaderRef = useRef(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const res = await fetch(
+        `https://dummyjson.com/products?limit=${productsPerPage}&skip=${
+          currentPage * productsPerPage
+        }`
+      );
+      const data = await res.json();
+
+      if (data.products.length === 0) {
+        setHasProduct(false);
+      } else {
+        // update product state
+        setProducts((prev) => [...prev, ...data.products]);
+
+        // update page
+        setCurrentPage((prev) => prev + 1);
+      }
+    };
+
+    const observerCallback = (items) => {
+      if (items[0].isIntersecting) {
+        fetchProducts();
+      }
+    };
+    const observer = new IntersectionObserver(observerCallback);
+
+    if (observer && loaderRef.current) {
+      observer.observe(loaderRef.current);
+    }
+
+    return () => {
+      if (observer) observer.disconnect();
+    };
+  }, [currentPage]);
+
+  return (
+    <div className="container my-10">
+      <h2 className="font-bold">Post List</h2>
+      <hr />
+      {products?.length > 0 ? (
+        products?.map((product) => <ProductCard key={product?.id} />)
+      ) : (
+        <h1>Product Not found</h1>
+      )}
+      <ProductCard />
+
+      {/* products loader  */}
+      {hasProduct && (
+        <div
+          ref={loaderRef}
+          className="w-10 h-10 animate-spin rounded-full border-dashed border-8 border-[#3b9df8] mx-auto"
+        />
+      )}
+    </div>
+  );
+};
+
+export default InfiniteScroll;
+```

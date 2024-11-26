@@ -1,0 +1,69 @@
+{/* dependencies */}
+import { Callout, FileTree } from 'nextra/components'
+
+## Loading and Streaming
+
+Loading UI খুবই গুরুত্বপূর্ণ ভূমিকা পালন করে User experience ভালো করার জন্য। একটা ওয়েবসাইট ওপেন করার পরে সবকিছু লোড না হওয়া পর্যন্ত ওয়েবসাইট যদি সাদা হয়ে থাকে বা একদমই কিছু না দেখা যায়, তাহলে ইউজার ভাবতে পারে ওয়েবসাইটে কোন সমস্যা আছে, তাই ওয়েবসাইট থেকে বের হয়ে যেতে পারে। এছাড়াও এখন ইন্টারনেট ফাস্ট হওয়ার ফলে ইউজারদের অধিকাংশের ধৈর্য্য একদমই কমে গেছে, তারা সবকিছু 10x speed এ expect করে থাকে। কিন্তু, একটি ওয়েবসাইটের সব HTML, CSS & Javascript fully parsed না হওয়া পর্যন্ত ইউজারকে কিছু দেখানো সম্ভব নয়। আর তাই Loading UI এর মাধ্যমে ইউজারকে এটা বোঝানো সম্ভব যে কিছু একটা প্রসেসিং এ আছে, দ্রুতই সবকিছু লোড হয়ে যাবে। ফলে, ইউজার ওয়েবসাইট থেকে বের হয়ে যাওয়ার সম্ভাবনা কমে যাবে।
+
+## Loading UI
+
+server side থেকে render ও data fetch করে client এ দেখানোর জন্য কিছু সময়ের প্রয়োজন হয়। সেই সময় যদি client এ কিছুই না দেখানো হয়, সেক্ষেত্রে user experience খুবই খারাপ হয়। এই সমস্যা সমাধানের জন্য যতক্ষণ server থেকে response না আসে ততক্ষণ কিছু loading দেখানো বা loading skleton দেখানোর কাজ করা যায় খুব সহজেই। এটা করার জন্য যে route segment এ loading effect দিতে চাই সেখানে loading.js file এর মধ্যে loading চলাকালীন কি render হবে সেই component রেখে দিলেই automatic কাজ করবে। নিচের উদাহরণে `/dashboard/analytics` route এর মধ্যে একটি loading.js file রাখা হয়েছে, ফলে analytics route এর সব code server থেকে যতক্ষণ না দিবে ততক্ষণ ঐ route এর মধ্যকার page.js load না হয়ে, loading.js দেখাবে।
+
+<FileTree>
+  <FileTree.Folder name="app" defaultOpen>
+    <FileTree.Folder name="dashboard" defaultOpen>
+      <FileTree.Folder name="settings" defaultOpen>
+        <FileTree.File name="page.js" />
+      </FileTree.Folder>
+      <FileTree.Folder name="analytics" defaultOpen>
+        <FileTree.File name="page.js" />
+        <FileTree.File name="loading.js" />
+      </FileTree.Folder>
+    </FileTree.Folder>
+    <FileTree.File name="layout.js" />
+    <FileTree.File name="page.js" />
+  </FileTree.Folder>
+</FileTree>
+
+<Callout>
+  প্রতিটি segment এ আমরা loading.js file ব্যবহার করতে পারি। এক্ষেত্রে যখন যে
+  segment run হবে, তখন ঐ segment এর নিকটবর্তী loading.js run করবে। যেমনঃ উপরের
+  file structure এর মধ্যে যদি dashboard এর মধ্যে আরেকেটি loading.js file রাখি
+  সেক্ষেত্রে settings এর জন্য dashboard এর মধ্যকার loading.js ব্যবহারিত হবে।
+  কিন্তু, analytics এর ক্ষেত্রে analytics এর মধ্যকার loading.js ব্যবহারিতে হবে।
+</Callout>
+
+## Streaming UI
+
+আগের স্টেপে যে loading effect দেওয়া হয়েছে সেটা page component এর সবগুলোকেই hide রাখবে যতক্ষণ না সার্ভার থেকে full data সহ response আসে। যেমনটা বলতে পারি যে একটা ভিডিও যেমন fully download না হলে আমাদের local machine থেকে play করা যায়না তেমন হবে। কিন্তু আমরা ইউটিউবসহ যত video streaming platform দেখি যেখান একবারে সব video download ছাড়াই chunk chunk আকারে download হয় আর আমরা সেটা play করতে পারি। ঠিক তেমনি আমাদের যদি heavy কোন component থাকে সেটাকে একবারে client এ download না করিয়ে chunk chunk আকারে download করাতে পারি, তাহলে user experience অনেক improve হবে। এটা করার জন্য Suspense & fallback ব্যবহার করতে হবে।
+
+শুধুমাত্র যে component গুলো load হতে সময় লাগতে পারে শুধুমাত্র সেগুলোকে আলাদা আলাদাভাবে Suspense এর মধ্যে মুড়িয়ে দিলে, যখন যেটা server থেকে response পাবে তখনই সেটা UI তে চলে আসবে, আর যেগুলোতে একদমই সময় লাগবে না, সেগুলো Suspense এর বাইরে রেখে দিলে segment open হওয়ার সাথে সাথেই দেখা যাবে।
+
+নিচের কোডে দেখা যাচ্ছে Posts & Users component load হতে সময় লাগতে পারে, তাই এই দুটিই Suspense এর মধ্যে রাখা হয়েছে। যেখন যেটা server থেকে চলে আসবে বা এর মধ্যকার কোন asyncronous task complete হয়ে যাবে তখনই fallback এর UI বাদ দিয়ে actual UI দেখাবে। এক্ষেত্রে Posts & Users একটা আরেকটার উপরে নির্ভরশীল থাকবে না।
+
+```js copy showLineNumbers {1, 11-13, 17-19}
+import { Suspense } from "react";
+import Posts from "../components/common/Posts";
+import Users from "../components/common/Users";
+import Sidebar from "../components/Sidebar";
+
+const HeavyPage = () => {
+  return (
+    <div className="container">
+      <h1 className="text-2xl">Heavy page header</h1>
+
+      <Suspense fallback={<h1>loading post...</h1>}>
+        <Posts />
+      </Suspense>
+
+      <Sidebar />
+
+      <Suspense fallback={<h1>loading users...</h1>}>
+        <Users />
+      </Suspense>
+    </div>
+  );
+};
+
+export default HeavyPage;
+```

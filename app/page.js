@@ -10,6 +10,12 @@ function Homepage() {
         React JS
       </Link>
       <Link
+        href="/nextjs"
+        className="border px-5 py-2 rounded-lg hover:bg-[#535ee0]"
+      >
+        Next JS
+      </Link>
+      <Link
         href="/firebase"
         className="border px-5 py-2 rounded-lg hover:bg-[#535ee0]"
       >
