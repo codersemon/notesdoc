@@ -1,0 +1,28 @@
+## Middleware
+
+Middleware প্রতিটা Request & Response এর মাঝে বসে Request & Reponse কে modify, redirect, rewrite ইত্যাদি করা যায়।
+
+## Use Cases
+- Authentication & Authorization এর ক্ষেত্রে প্রয়োজন হয়। 
+- বিভিন্ন conditions এর উপরে নির্ভর করে Server-Side Redirects করানো যায়। 
+- Path rewrite করার ক্ষেত্রে। যেমনঃ /about নামে একটি পেজ ছিল যেটা delete করে দেওয়া হয়েছে, কিন্তু এই পেজ বিভিন্ন জায়গা শেয়ার করা আছে। এখন, এই /about এ যদি request করা হয় অন্য কোন segment এ পাঠানো হবে, কিন্তু browser url এর মধ্যে /about দেখা যাবে। 
+- Bot detection এর মাধ্যমে application এর security improve করা যাবে। 
+- Logging and Analytics ক্ষেত্রে কাজে লাগবে। 
+
+## Usages
+
+Project এর root directory তে `middleware.js` বা `middleware.ts` নামে ফাইল নিতে হবে। middleware file এর মধ্যে redirect করা হচ্ছে, যদি `/about` segment বা এর মধ্যকার কোন segment থেকে request আসলেই root segment এ redirect করে দিবে।
+
+```js copy showLineNumbers filename="middleware.js"
+import { NextResponse } from "next/server";
+
+// This function can be marked `async` if using `await` inside
+export function middleware(request) {
+  return NextResponse.redirect(new URL("/", request.url));
+}
+
+// See "Matching Paths" below to learn more
+export const config = {
+  matcher: "/about/:path*",
+};
+```

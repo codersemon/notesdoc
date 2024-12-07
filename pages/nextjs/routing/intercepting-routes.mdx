@@ -1,0 +1,82 @@
+{/* dependencies */}
+import { FileTree } from 'nextra/components'
+
+## Intercepting Routes
+
+Navigation 2 রকমের হয়ে থাকে। একটি হচ্ছে client navigation, যেটি Link এর মাধ্যমে navigate করানো হয়। অন্যটা হচ্ছে server navigation / direct navigation এটি page reload কিংবা সরাসরি url navigate করানোকে বোঝানো হয়, যেমনঃ google, fb ইত্যাদিতে website এর link share করা হলে সেখান থেকে user ঐ url দিয়ে ওয়েবসাইটে আসে। আমরা যদি এই দুই ধরনের navigation এর জন্য দুইরকম component দেখাতে চাই, ঠিক তখনই এই Intercepting routes concepts আমাদেরকে help করবে। <span className="text-fuchsia-500">Intercepting component দেখাবে client navigation এর সময়।</span>
+
+## Usages:
+
+যদি একই level এ client navigation intercept করতে চাই সেক্ষেত্রে (.)folderName দিয়ে folder বানাতে হবে। নিচের উদাহরণে দেখা যাচ্ছে campaing route intercept করা হচ্ছে। আর এই দুটি directory একই level এ হবার জন্য intercepting route এর আগে একটা dot parenthesis এর মধ্যে দেওয়া হয়েছে। এখন campain/page.js যে component থাকবে সেটি page reload / direct navigation এর সময় দেখাবে। আর (.)campaign/page.js এর component টি client navigation / Link এর মাধ্যমে navigate করার সময় দেখাবে।
+
+### Same level intercepting
+
+একই লেভেলে intercept করতে হলে যে segment intercept করতে চাই সেই segment folder এর আগে `(.)` দিয়ে ফোল্ডার বানাতে হবে। নিচের উদাহরণে `campaign` কে intercept করা হয়েছে।
+
+<FileTree>
+  <FileTree.Folder name="app" defaultOpen>
+    <FileTree.Folder name="dashboard" defaultOpen>
+      <FileTree.Folder name="(.)campaign">
+        <FileTree.File name="page.js" />
+      </FileTree.Folder>
+      <FileTree.Folder name="campaign">
+        <FileTree.File name="page.js" />
+      </FileTree.Folder>
+      <FileTree.File name="page.js" />
+      <FileTree.File name="layout.js" />
+    </FileTree.Folder>
+    <FileTree.File name="layout.js" />
+    <FileTree.File name="page.js" />
+  </FileTree.Folder>
+</FileTree>
+
+### One level above intercepting
+
+এক লেভেল উপরের কোন segment কে intercept করতে হলে যে segment intercept করতে চাই সেই segment folder এর আগে `(..)` দিয়ে ফোল্ডার বানাতে হবে। নিচের উদাহরণে `campaign` কে intercept করা হয়েছে।
+
+<FileTree>
+  <FileTree.Folder name="app" defaultOpen>
+    <FileTree.Folder name="dashboard" defaultOpen>
+      <FileTree.Folder name="campaign">
+        <FileTree.File name="page.js" />
+      </FileTree.Folder>
+      <FileTree.Folder name="facebook" defaultOpen>
+        <FileTree.Folder name="(..)campaign">
+          <FileTree.File name="page.js" />
+        </FileTree.Folder>
+        <FileTree.File name="page.js" />
+      </FileTree.Folder>
+      <FileTree.File name="page.js" />
+      <FileTree.File name="layout.js" />
+    </FileTree.Folder>
+    <FileTree.File name="layout.js" />
+    <FileTree.File name="page.js" />
+  </FileTree.Folder>
+</FileTree>
+
+### Root level intercepting
+
+app root level এর কোন segment কে intercept করতে হলে যে segment intercept করতে চাই সেই segment folder এর আগে `(...)` দিয়ে ফোল্ডার বানাতে হবে। নিচের উদাহরণে `contact` কে intercept করা হয়েছে।
+
+<FileTree>
+  <FileTree.Folder name="app" defaultOpen>
+    <FileTree.Folder name="contact">
+      <FileTree.File name="page.js" />
+    </FileTree.Folder>
+    <FileTree.Folder name="dashboard" defaultOpen>
+      <FileTree.Folder name="campaign">
+        <FileTree.File name="page.js" />
+      </FileTree.Folder>
+      <FileTree.Folder name="facebook" defaultOpen>
+        <FileTree.Folder name="(...)contact">
+          <FileTree.File name="page.js" />
+        </FileTree.Folder>
+        <FileTree.File name="page.js" />
+      </FileTree.Folder>
+      <FileTree.File name="page.js" />
+      <FileTree.File name="layout.js" />
+    </FileTree.Folder>
+    <FileTree.File name="layout.js" />
+    <FileTree.File name="page.js" />
+  </FileTree.Folder>
+</FileTree>

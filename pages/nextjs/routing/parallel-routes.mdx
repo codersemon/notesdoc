@@ -1,0 +1,136 @@
+{/* dependencies */}
+import { FileTree } from 'nextra/components'
+
+## Parallel Routes
+
+যখন একটা segment এর মধ্যেই একাধিক page.js load করানোর প্রয়োজন হয়, তখন এটি কাজে আসে। এটি আসলে একটা segment এর জন্য যতগুলো ফাইল ব্যবহার করা যায়, সবই করতে পারে। যেমনঃ loader.js, error.js etc
+
+## Usages
+
+parallel route এর জন্য প্রতিটা folder এক একটা slot হিসেবে পরিচিত। প্রতিটা slot folder এর নামের শুরুতে @ sign দিতে হবে। এটি layout.js file থেকে props আকারে catch করে ব্যবহার করতে হবে।
+
+নিচে দেখা যাচ্ছে dashboard segment এর মধ্যে `@` sign দিয়ে `analytics` & `notification` দুইটা folder নেওয়া হয়েছে। এগুলোকে nextjs এর ভাষায় slot বলা হয়। এগুলোর মধ্যে প্রতিটা segment এ যে সকল ফাইল নেওয়া যায়, সেগুলো সবই নেওয়া যাবে। তবে, পার্থক্য হচ্ছে এই slot গুলো publicly accessible না; শুধুমাত্র ঐ folder গুলোর parent এর মধ্যে যে `layout` file আছে সেখানে props হিসেবে ব্যবহার করা যাবে (১, ৬ ও ৭ নম্বর লাইনে ব্যবহার করা হয়েছে)।
+
+<FileTree>
+  <FileTree.Folder name="app" defaultOpen>
+    <FileTree.Folder name="dashboard" defaultOpen>
+      <FileTree.Folder name="@analytics" defaultOpen>
+        <FileTree.File name="page.js" />
+      </FileTree.Folder>
+      <FileTree.Folder name="@notification" defaultOpen>
+        <FileTree.File name="page.js" />
+      </FileTree.Folder>
+      <FileTree.File name="page.js" />
+      <FileTree.File name="layout.js" />
+    </FileTree.Folder>
+    <FileTree.File name="layout.js" />
+    <FileTree.File name="page.js" />
+  </FileTree.Folder>
+</FileTree>
+
+```js copy showLineNumbers filename="app/dashboard/layout.js" {1, 6, 7}
+const Dashboard = ({ children, analytics, notification }) => {
+  return (
+    <div className="container">
+      <div className="grid grid-cols-2 gap-5">
+        {children}
+        {analytics}
+        {notification}
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;
+```
+
+## Parallel Routes Sub Navigation
+
+Parallel routes এর মধ্যে sub navigation বানানো যায়। যে slot এর folder এর মধ্যে new segment নেওয়া হবে, navigate করলে ঐ slot এর মধ্যেই ঐ segment load হবে।
+
+<FileTree>
+  <FileTree.Folder name="app" defaultOpen>
+    <FileTree.Folder name="dashboard" defaultOpen>
+      <FileTree.Folder name="@analytics" defaultOpen>
+        <FileTree.File name="page.js" />
+      </FileTree.Folder>
+      <FileTree.Folder name="@notification" defaultOpen>
+        <FileTree.Folder name="inbox" defaultOpen>
+          <FileTree.File name="page.js" />
+        </FileTree.Folder>
+        <FileTree.File name="page.js" />
+      </FileTree.Folder>
+      <FileTree.File name="page.js" />
+      <FileTree.File name="layout.js" />
+    </FileTree.Folder>
+    <FileTree.File name="layout.js" />
+    <FileTree.File name="page.js" />
+  </FileTree.Folder>
+</FileTree>
+
+dashboard এর মধ্যে layout.js এর মধ্যে parallel routes এর props গুলো ব্যবহার করা হয়েছে।
+
+```js copy showLineNumbers filename="app/dashboard/layout.js" {1, 6, 7}
+const Dashboard = ({ children, analytics, notification }) => {
+  return (
+    <div className="container">
+      <div className="grid grid-cols-2 gap-5">
+        {children}
+        {analytics}
+        {notification}
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;
+```
+
+`@notification` slot এর page.js এর মধ্য থেকে `/dashboard/inbox` navigate করা হচ্ছে। এখানে `@notification` url path এ আসছে না; কেননা, group rotes এর মত parallel routes ও উহ্য থাকে। যখন `See ChatBox` এ click করা হবে তখন layout এর notification slot এর স্থানে inbox.js load হবে এবং `children` & `analytics` নিজস্ব স্থানেই থাকবে।
+
+```js copy showLineNumbers filename="app/dashboard/@notification/page.js" {7}
+import Link from "next/link";
+
+const Notification = () => {
+  return (
+    <div className="border border-black col-span-2 p-10 rounded">
+      <h1>Notification</h1>
+      <Link href="/dashboard/inbox" className="text-blue-400">
+        {" "}
+        See ChatBox
+      </Link>
+    </div>
+  );
+};
+
+export default Notification;
+```
+
+## Unmatched Routes
+
+[Sub navigation](#parallel-routes-sub-navigation) এ আমরা যেটা শিখেছি সেটা শুধুমাত্র client side navigation (Link component এ click করে navigate) এর সময় ঠিকভাবে কাজ করবে, কিন্তু যদি page reload করা হয় তখন 404 error দেখাবে। যেমনঃ Notification slot থেকে `See Chatbox` এ ক্লিক করে inbox open করলে ঠিকভাবে দেখা যাবে। কিন্তু, directly `/dashboard/inbox` এভাবে open করা হয়ে বা ঐ page এ থেকে reload করা হয় তখন 404 দেখাবে। এই সমস্যাকেই `Unmatched routes` বলা হয়।
+
+এই সমস্যার সমাধান হচ্ছে প্রতিটা slot এবং parallel route এর root এ default.js file রাখতে হবে, এটি route reload হওয়ার সময় fallback হিসেবে দেখাবে।
+
+<FileTree>
+  <FileTree.Folder name="app" defaultOpen>
+    <FileTree.Folder name="dashboard" defaultOpen>
+      <FileTree.Folder name="@analytics" defaultOpen>
+        <FileTree.File name="default.js" />
+        <FileTree.File name="page.js" />
+      </FileTree.Folder>
+      <FileTree.Folder name="@notification" defaultOpen>
+        <FileTree.Folder name="inbox" defaultOpen>
+          <FileTree.File name="page.js" />
+        </FileTree.Folder>
+        <FileTree.File name="page.js" />
+        <FileTree.File name="default.js" />
+      </FileTree.Folder>
+      <FileTree.File name="page.js" />
+      <FileTree.File name="layout.js" />
+      <FileTree.File name="default.js" />
+    </FileTree.Folder>
+    <FileTree.File name="layout.js" />
+    <FileTree.File name="page.js" />
+  </FileTree.Folder>
+</FileTree>
