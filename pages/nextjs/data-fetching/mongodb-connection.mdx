@@ -1,0 +1,179 @@
+{/* dependencies */}
+import { Steps } from "nextra/components";
+
+## MongoDB connection with nextjs application
+
+nextjs একটি full-stack framework. তাই এখানে যেকোন database connection setup করার মাধ্যমে খুব সহজেই application কে database এর সাথে communication করানো সম্ভব।
+
+## Database connection utility function with caching
+
+<Steps>
+### Step 1
+
+প্রথমে nextjs application এ নিচের package টি install করে নিতে হবে।
+
+```bash copy
+npm i mongoose
+```
+
+### Step 2
+
+যদি mongodb এর database ব্যবহার করা হয়, তাহলে নিচের মত একটি connection string পাওয়া যাবে সেটি ব্যবহার করতে .env file এর মধ্যে।
+
+```js copy filename=".env"
+MONGO_URI = mongodb+srv://{yourUsername}:{yourPassword}@{clusterString}/{databaseName}
+```
+
+### Step 3
+
+নিচে database এর সাথে connection setup করা জন্য একটি utility function দেওয়া হয়েছে। এটি connection setup এর সাথে সাথে cache করে ফেলবে, ফলে প্রতিটা request এর জন্য বার বার নতুন connection setup করবে না।
+
+```js copy filename="dbConnection/mongoDBConnect.js"
+// dependencies
+import mongoose from "mongoose";
+
+// getting MONGODB String
+const MONGO_URI = process.env.MONGO_URI;
+const cached = {};
+
+async function connectMongoDB() {
+  // if mongodb string not found, throw error
+  if (!MONGO_URI) {
+    throw new Error(
+      "Please define the MONGO_URI environment variable inside .env.local"
+    );
+  }
+
+  // if already connected to the db, then return connection from cache
+  if (cached.connection) {
+    return cached.connection;
+  }
+
+  if (!cached.promise) {
+    const opts = {
+      bufferCommands: false,
+    };
+    cached.promise = mongoose.connect(MONGO_URI, opts);
+  }
+
+  try {
+    cached.connection = await cached.promise;
+  } catch (e) {
+    cached.promise = undefined;
+    throw e;
+  }
+  return cached.connection;
+}
+export default connectMongoDB;
+```
+
+</Steps>
+
+## `Create` data on mongodb using `nextjs server action`
+
+<Steps>
+### Step 1 
+প্রথমেই data model বানাতে হবে, এই model এর মাধ্যমেই database এর মধ্যে collection & document বানানো হবে।
+
+নিচে যে কোড লিখা আছে সেটার মাধ্যমে User model বানানো হয়েছে, যেটি আমাদের connected database এর মধ্যে `users` নামে একটি collection তৈরি করবে যদি আগে থেকে collection না থাকে, আর যদি ইতিমধ্যে collection create হয়ে থাকে তাহলে ঐ collection model return করবে।
+
+```js copy showLineNumbers filename="models/userModel.js" {}
+// dependencies
+import mongoose from "mongoose";
+
+// create schema
+const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+    },
+    email: {
+      type: String,
+      unique: true,
+      match: [
+        /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+        "Please fill a valid email address",
+      ],
+    },
+  },
+  { timestamps: true }
+);
+
+// if already model created use that, otherwise create new model
+const User = mongoose.models.User || mongoose.model("User", userSchema);
+
+// export model
+export default User;
+```
+
+### Step 2 
+
+[Server Actions]("/nextjs/data-fetching/server-actions") এ আমরা শিখেছি কিভাবে formData পাওয়া যায়। সেই পদ্ধতি ব্যবহার করে form এর Data get করে ২০ নম্বর লাইনে MongoDB এর সাথে connection setup করা হচ্ছে। আর ২৩ নম্বর লাইনে database এ Data save করা হচ্ছে, যদিও আমরা ২৬নং লাইনে দেখানো পদ্ধতিতেও data save করতে পারি। 
+
+২৯নং লাইনে path revalidate করা হচ্ছে, ফলে যে collection/table এর মধ্যে data insert করা হচ্ছে, সেই collection/table থেকে যদি application এর মধ্যে data fetch করে দেখানো হয়, সেখানে data automatic synchronize হয়ে যাবে। revalidate path এর মধ্যে সেই path দিতে হবে যেখানে data fetch করে দেখানো হচ্ছে।
+
+```js copy showLineNumbers filename="" {1-3, 19-29}
+import connectMongoDB from "@/dbConnection/mongoDBConnect";
+import User from "@/models/userModel";
+import { revalidatePath } from "next/cache";
+
+const NewUserForm = () => {
+  const addUserAction = async (formData) => {
+    "use server";
+
+    // get submission data
+    const name = formData.get("name");
+    const email = formData.get("email");
+
+    // user data
+    const userData = {
+      name,
+      email,
+    };
+
+    // setup DB connection
+    await connectMongoDB();
+
+    // add user in db
+    await new User(userData).save();
+
+    // alternative way 
+    // await User.create(userData);
+
+    // revalidate path
+    revalidatePath("/");
+  };
+
+  return (
+    <form className="mt-4 border p-4 rounded-md" action={addUserAction}>
+      <h2 className="text-2xl font-bold mb-5">User Registration</h2>
+      <div className="mb-4">
+        <input
+          type="text"
+          name="name"
+          className="border rounded-md w-2/6 px-3 py-1"
+          placeholder="Type your full name"
+        />
+      </div>
+      <div className="mb-4">
+        <input
+          type="email"
+          name="email"
+          className="border rounded-md w-2/6 px-3 py-1"
+          placeholder="Type your email address"
+        />
+      </div>
+      <button
+        type="submit"
+        className="px-5 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+      >
+        Register
+      </button>
+    </form>
+  );
+};
+
+export default NewUserForm;
+```
+
+</Steps>

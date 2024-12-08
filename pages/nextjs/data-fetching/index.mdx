@@ -1,0 +1,138 @@
+## Data Fetching
+
+nextjs application এর মধ্যে ৪ ভাবে data fetch করা যায়।
+
+- On the `server`, with `fetch`
+- On the `server`, with `third-party libraries`
+- On the `client`, via a `Route Handler`
+- On the `client`, with `third-party libraries`
+
+## Fetching Data on the `Server` with `fetch`
+
+nextjs নিজেই web এর default `fetch` api কে extend করে দিয়েছে। এর ফলে আমরা যদি fetch api দিয়ে data fetch করি তাহলে nextjs এর caching & revalidation system খুব সহজেই ব্যবহার করতে পারবো।
+
+fetching code separate রাখার জন্য utils file এর মধ্যে data fetcher function লিখা হয়েছে। এই fetcher function থেকে promise return করা হয়েছে।
+
+```js copy showLineNumbers filename="utils/getJoke.js" {}
+export const getJoke = async () => {
+  // fetch joke api
+  const response = await fetch("https://api.chucknorris.io/jokes/random");
+
+  // if response not found
+  if (!response.ok) {
+    throw new Error("Joke fetching failed!");
+  }
+
+  // return promise
+  return response.json();
+};
+```
+
+উপরে fetcher function এর মধ্যে যে promise return করা হয়েছে সেটা page.js এর মধ্যে `async/await` এর মাধ্যমে data নিয়ে সেটা UI তে ব্যবহার করা হয়েছে। app route এর মধ্যে সবগুলো component/page server component তাই `async` করা সম্ভব।
+
+```js copy showLineNumbers filename="app/fetching/page.js" {6, 8}
+// dependencies
+import { getJoke } from "@/utils/getJoke";
+
+const DataFetchingPage = async () => {
+  // get joke data
+  const data = await getJoke();
+
+  return <div className="container text-2xl">{data.value}</div>;
+};
+
+export default DataFetchingPage;
+```
+
+## fetch api cache
+
+fetch api ব্যবহার করলে by default cache করে রাখে। আমরা আমাদের প্রয়োজন মত এই cache control করতে পারি।
+
+### `{cache: "no-store"}`
+
+যদি fetch request cache না করতে চাই, তাহলে fetch এর 2nd arg হিসেবে object pass করতে হবে, যেখানে `cache: "no-store"` দিতে হবে। তাহলে request cache করবে না, প্রতিটা request এর মাধ্যমে নতুন data নিয়ে আসবে। by default cache এর ভেলু `force-cache` থাকে।
+
+```js copy showLineNumbers filename="utils/getJoke.js" {3}
+export const getJoke = async () => {
+  // fetch joke api
+  const response = await fetch("https://api.chucknorris.io/jokes/random", {
+    cache: "no-store",
+  });
+
+  // if response not found
+  if (!response.ok) {
+    throw new Error("Joke fetching failed!");
+  }
+
+  // return promise
+  return response.json();
+};
+```
+
+### Opting out of Data Caching
+
+fetch requests are not cached if:
+
+- The cache: 'no-store' is added to fetch requests.
+- The revalidate: 0 option is added to individual fetch requests.
+- The fetch request is inside a Router Handler that uses the POST method.
+- The fetch request comes after the usage of headers or cookies.
+- The const dynamic = 'force-dynamic' route segment option is used.
+- The fetchCache route segment option is configured to skip cache by default.
+- The fetch request uses Authorization or Cookie headers and there's an uncached request above it in the component tree.
+
+## Revalidating Data
+
+data fetch করার সময় `cache: "no-store"` ব্যবহার করা হয় তখন যে segment এর মধ্যে ঐ fetcher থাকবে ঐ segment page static এর পরিবর্তে dynamic render হয়ে থাকে। কিন্তু, আমাদের যদি এমন প্রয়োজন হয় একটা নির্দিষ্ট সময় পর পর নতুন data fetch করবে আর বাকি সময় cache থেকে দেখাবে। শুধু এতটুকুই নয়, revalidation system ব্যবহার করলে page static render হবে, যেটি application এর performance অনেক বেড়ে যাবে।
+
+<p className="mt-10 font-bold text-fuchsia-500">Revalidation দুইভাবে করা যাবে।</p>
+
+- Time based revalidation : fetch api এর মধ্যে seconds এ revalidation interval দিয়ে দিতে হবে।
+- On-demand revalidation : function এর মাধ্যমে revalidation করা যাবে।
+
+### Time based revalidation
+
+fetch api level এ নিচে revalidate করে করা হয়েছে। প্রতি ১০ সেকেন্ড পর পর revalidate করবে।
+
+```js copy showLineNumbers filename="utils/getJoke.js" {4}
+export const getJoke = async () => {
+  // fetch joke api
+  const response = await fetch("https://api.chucknorris.io/jokes/random", {
+    next: { revalidate: 10 },
+  });
+
+  // if response not found
+  if (!response.ok) {
+    throw new Error("Joke fetching failed!");
+  }
+
+  // return promise
+  return response.json();
+};
+```
+
+route segment level এ page.js এর মধ্যে যদি revalidate const named export করে দিলে এই page এর মধ্যে যতগুলো fetch api initiate করা হবে সবগুলোই revalidate করা যাবে।
+
+```js copy showLineNumbers filename="app/fetching/page.js" {5}
+// dependencies
+import { getJoke } from "@/utils/getJoke";
+
+// revalidate all fetch api in each 10 seconds
+export const revalidate = 10;
+
+const DataFetchingPage = async () => {
+  // get joke data
+  const data = await getJoke();
+
+  return <div className="container text-2xl">{data.value}</div>;
+};
+
+export default DataFetchingPage;
+```
+
+### Revalidate path 
+[এখানে path revalidation এর ব্যবহার দেখানো হয়েছে]("/nextjs/data-fetching/mongodb-connection#create-data-on-mongodb-using-nextjs-server-action")
+
+## Fetching data on the `Server` with `third-party libraries`
+
+third party বিভিন্ন library ব্যবহার করেও server side data fetching করা যায়। server side data fetching এর ক্ষেত্রে third-party libraries ব্যবহার করলে caching আমাদের নিজের থেকেই manage করতে হবে। তাই আমাদের সবসময় চেষ্টা রাখতে হবে fetch api ব্যবহার করার। নিচে axios ব্যবহার করে data fetching & caching দেখানো হয়েছে।

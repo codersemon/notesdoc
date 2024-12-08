@@ -1,0 +1,173 @@
+{/* dependencies */}
+import { Callout } from "nextra/components"
+
+## What is server action in nextjs?
+
+Server action একটি function ছাড়া আর কিছুই না। তবে, এই function এর মাধ্যমে অনেক জটিল/ বেশি কোডের কাজ খুব সহজেই অল্প কয়েক লাইনের কোড লিখেই করা সম্ভব। যেমনঃ react application এ একটি form manage করা এবং form এর data server/database এ save করার জন্য অনেক কোড লিখার প্রয়োজন হয়। কিন্তু এই কাজ যদি আমরা server action এর মাধ্যমে করি, তাহলে সেটি খুব সহজেই handle করা সম্ভব হবে।
+
+## Usages of server action with form handle
+
+নিচে একটি form component দেখা যাচ্ছে। react application এ এই form এর data manage করা এবং সেটি server/database পাঠানোর জন্য কি কি করা প্রয়োজন সে সম্পর্কে ইতিমধ্যে ধারণা আছে। যেমনঃ form এর data রাখার জন্য একটি state manage করতে হবে `useState` এর মাধ্যমে, আর server/database এ পাঠানোর জন্য `useEffect` hook এর মাধ্যমে api request send করতে হবে। কিন্তু, আমরা যদি server action use করি তাহলে আমাদেরকে state manage করার প্রয়োজন হবে না এবং useEffect hoook এর মাধ্যমে api request send করার প্রয়োজন হবে না।
+
+```js copy showLineNumbers filename="components/NewUserForm.jsx" {}
+const NewUserForm = () => {
+  return (
+    <form className="mt-4 border p-4 rounded-md">
+      <h2 className="text-2xl font-bold mb-5">User Registration</h2>
+      <div className="mb-4">
+        <input
+          type="text"
+          name="name"
+          className="border rounded-md w-2/6 px-3 py-1"
+          placeholder="Type your full name"
+        />
+      </div>
+      <div className="mb-4">
+        <input
+          type="email"
+          name="email"
+          className="border rounded-md w-2/6 px-3 py-1"
+          placeholder="Type your email address"
+        />
+      </div>
+      <button
+        type="submit"
+        className="px-5 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+      >
+        Register
+      </button>
+    </form>
+  );
+};
+
+export default NewUserForm;
+```
+
+নিচের কোডের মধ্যে ২ থেকে ১৭ নম্বর লাইনে server action function লিখা হয়েছে আর ২০ নম্বর লাইনে সেই action function form এর মধ্যে ব্যবহার হয়েছে।
+
+server action অবশ্যই server এ execute করাতে হবে, নয়তো কাজ করবে না; তাই function এর শুরুতে `use server` directive use করা হয়েছে। নিচের server action টি যেহেতু form handle করার জন্য ব্যবহার করা হবে, তাই function এর 1st parameter এ `formData` পাওয়া যাবে। এই formData raw js এর formData object, এটির উপরে `get() method` এর মধ্যে form এর input field এর `name` attribute এর value দিয়ে user এর লিখা তথ্য পাওয়া যাবে। সেটা প্রসেসিং করে আমাদের প্রয়োজনমতো server/database এ পাঠানো যাবে। server action function টি async হতে হবে।
+
+```js copy showLineNumbers filename="components/NewUserForm.jsx" {2-17, 20}
+const NewUserForm = () => {
+  const addUserAction = async (formData) => {
+    "use server";
+
+    // get submission data
+    const name = formData.get("name");
+    const email = formData.get("email");
+
+    // user data
+    const userData = {
+      name,
+      email,
+    };
+
+    // log in server
+    console.log(userData);
+  };
+
+  return (
+    <form className="mt-4 border p-4 rounded-md" action={addUserAction}>
+      <h2 className="text-2xl font-bold mb-5">User Registration</h2>
+      <div className="mb-4">
+        <input
+          type="text"
+          name="name"
+          className="border rounded-md w-2/6 px-3 py-1"
+          placeholder="Type your full name"
+        />
+      </div>
+      <div className="mb-4">
+        <input
+          type="email"
+          name="email"
+          className="border rounded-md w-2/6 px-3 py-1"
+          placeholder="Type your email address"
+        />
+      </div>
+      <button
+        type="submit"
+        className="px-5 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+      >
+        Register
+      </button>
+    </form>
+  );
+};
+
+export default NewUserForm;
+```
+
+## Is server action only for formData handle?
+
+`না`, server action এর মাধ্যমে যেকোন ধরনের কাজ করা সম্ভব যেগুলো server এ execute করানো সম্ভব। যেমনঃ data fetching, revalidating, redirecting etc
+
+### Data fetching with server action
+
+Server action যেহেতু asyncronous তাই খুব সহজেই server action এর মাধ্যমে data fetch করা সম্ভব।
+
+নিচে mongo database থেকে user list এনে return করা হচ্ছে। যেটি পরবর্তী কোড ব্লকে দেখানো হয়েছে। উল্লেখ্য, আমরা যদি একটি file এর মধ্যে একাধিক server action function define করি, তাহলে প্রতিটা function এর মধ্যে `use server` লিখার পরিবর্তে শুধুমাত্র একবার একদম শুরুতে লিখে দিলেই হয়ে যাবে।
+
+```js copy showLineNumbers filename="actions/userActions.js" {}
+"use server";
+
+import connectMongoDB from "@/dbConnection/mongoDBConnect";
+import User from "@/models/userModel";
+
+export const getAllUsers = async () => {
+  try {
+    // setup db connection
+    await connectMongoDB();
+
+    // getting users list from db
+    const users = await User.find();
+
+    // returns users list
+    return users;
+  } catch (error) {
+    throw error;
+  }
+};
+```
+
+<Callout>
+  user create, edit, update, delete, get বিভিন্ন ধরনের action প্রয়োজন হতে পারে,
+  তাই সবগুলো actions যেন একই file এর মধ্যে ভালোভাবে organize করার জন্য আমরা
+  modular way তে কাজ করতে পারি। উপরে সেই approach টাই ব্যবহার করা হয়েছে।
+</Callout>
+
+আগের স্টেপে লিখা server action ২নং লাইনে import করে ৬নং লাইনে ব্যবহার করা হয়েছে। সবগুলো কোড যেহেতু server এ execute হচ্ছে তাই আমাদেরকে কোন ধরনের effect handler দরকার হচ্ছে না।
+
+```js copy showLineNumbers filename="components/UserList.jsx" {2, 6}
+// dependencies
+import { getAllUsers } from "@/actions/userActions";
+
+const UserList = async () => {
+  // getting user list from db
+  const users = await getAllUsers();
+
+  return (
+    <div className="border p-4 rounded-md mt-8">
+      <h2 className="text-2xl font-bold mb-5">User List</h2>
+
+      <div className="grid grid-cols-4 gap-3">
+        {users?.length > 0 ? (
+          users?.map((user) => (
+            <div
+              key={user?.id}
+              className="border border-blue-300 p-5 rounded-md shadow-md"
+            >
+              <p>Name: {user?.name}</p>
+              <p>Email: {user?.email} </p>
+            </div>
+          ))
+        ) : (
+          <p className="text-xl text-red-500">No user found!</p>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default UserList;
+```
