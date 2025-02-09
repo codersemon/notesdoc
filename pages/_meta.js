@@ -11,6 +11,7 @@ const rootRoute = {
     href: "https://emonkhan.me/about/",
     newWindow: true,
   },
+  js: "Javascript",
   reactjs: "React JS",
   nextjs: "Next JS",
   "react-router-dom": "React Router DOM",
