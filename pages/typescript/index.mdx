@@ -1,0 +1,60 @@
+{/* dependencies */}
+import { Steps } from "nextra/components";
+
+## TypeScript কি এবং কেন?
+
+TypeScript হল JavaScript-এর একটি সুপারসেট, অর্থাৎ এটি JavaScript- এর সকল কোড TypeScript এর মধ্যে কাজ করে থাকে। TypeScript মূলত JavaScript-এ টাইপ সেফটি (Type Safety) যোগ করার জন্য ডিজাইন করা হয়েছে। এটি Microsoft বানিয়েছে এবং মেইনটেইন করে থাকে।
+
+## TypeScript কিভাবে কাজ করে থাকে?
+
+TypeScript সরাসরি ব্রাউজারে রান করে না। এটি কম্পাইল হয়ে জাভাস্ক্রিপ্টে কনভার্ট হয়ে ব্রাউজারে রান হয়ে থাকে।
+
+## Installation
+
+প্রথমে আমাদের মেশিনে গ্লোবালি install করে নিতে হবে। যদি globally install না করা হয় তাহলে, আমাদের project এ typescript ব্যবহার করার জন্য প্রতিটা command এর পূর্বে `npx` add করে নিতে হবে। তাই globally typescript package install করে নেওয়া ভালো।
+
+```bash copy
+npm install -g typescript
+```
+
+## Project setup
+
+<Steps>
+### Step 1
+যেহেতু typescript কম্পাইল হয়ে থাকে node এর মাধ্যমে, তাই আমাদেরকে একটি node project setup করে নিতে হবে। নিচের command দিয়ে কয়েকটি ধাপ অনুসরণ করার মাধ্যমে node project setup করে নিতে হবে।
+
+```bash copy
+npm init
+```
+
+### Step 2
+
+এবারে আমাদের প্রজেক্টে typescript devDependency হিসেবে install করে নিতে হবে। typescript যেহেতু শুধুমাত্র compile time এ কাজে লাগবে, তাই এটি devDependency হিসেবে install করতে হবে।
+
+```bash copy
+npm i -D typescript
+```
+
+### Step 3
+
+এখন আমাদেরকে tsconfig.json file বানাতে হবে, যেটিকে typescript project এর heart হিসেবে গণ্য করা হয়। নিচের command দিলেই tsconfig.json file তৈরি হয়ে যাবে। আমাদেরকে এই command দিয়েই tsconfig.json file বানাতে হবে, কেননা এই ফাইলের মধ্যে typescript এর সকল configuration রাখতে হবে, আর এই command এর মাধ্যমে ফাইলটি বানালে সবকিছু automatic পেয়ে যাবো।
+
+```bash copy
+tsc --init
+```
+
+### Step 4
+
+ইতিমধ্যেই আমরা project setup complete করে ফেলেছি। এখন আমরা আমাদের project এ typescript নিয়ে কাজ করতে পারি। typescript file এর extension হচ্ছে `ts`. আমাদের প্রজেক্টে ts ফাইল বানাতে হবে। এই ফাইল থেকে js file এ compile করার জন্য নিচের command দিতে হবে। 
+
+```bash copy 
+tsc 
+```
+
+উপরের command বার বার দিতে হবে আমাদের কোন ফাইলে পরিবর্তন আনলেই। কিন্তু আমরা যদি চাই ts file এর মধ্যে কোন পরিবর্তন হলেই compilled file এর মধ্যে সেগুলো আপডেট হয়ে যাবে, সেক্ষেত্রে নিচের কমান্ড দিতে হবে। নিচের কমান্ড tsc বা typescript compiller কে watch করতে থাকবে, আর কোন পরিবর্তন হলেই সেটি compile করে ফেলবে।
+
+```bash copy 
+tsc -w 
+```
+
+</Steps>

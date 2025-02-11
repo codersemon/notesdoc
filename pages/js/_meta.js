@@ -1,4 +1,4 @@
 const javascriptRoutes = {
-    index: "Javascript Basics",
+    index: "Getting Started",
   };
   export default javascriptRoutes;

@@ -12,6 +12,7 @@ const rootRoute = {
     newWindow: true,
   },
   js: "Javascript",
+  typescript: "TypeScript",
   reactjs: "React JS",
   nextjs: "Next JS",
   "react-router-dom": "React Router DOM",
