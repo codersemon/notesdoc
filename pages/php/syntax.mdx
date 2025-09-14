@@ -1,0 +1,22 @@
+## Some basic syntax
+
+## syntax for variable 
+$ দিয়ে একটি variable এর নাম শুরু করতে হবে। $ sign এর পরে যেকোন alphabet দিতে হবে এরপরে প্রয়োজনে number ব্যবহার করা যাবে। কিন্তু number দিয়ে variable এর নাম শুরু হতে পারবে না।
+
+```php copy 
+$age = 12;
+$student1 = "Tawsif";
+```
+
+## double quote vs single quote 
+double quote এর মধ্যে variable দিলে সেটা variable হিসেবে কাজ করবে। কিন্তু single quote এর মধ্যে variable দিলে সেটি string হিসেবে কাজ করবে। double quote এর মধ্যে variable লিখতে চাইলে সেটি curly braces এর মধ্যে লিখা ভালো, তাহলে সহজেই বোঝা যাবে কোনটা variable আর কোনটা string. 
+
+```php copy 
+$age = 12;
+
+echo "My age is {$age}";
+// output will be My age is 12;
+
+echo 'My age is {$age}';
+// output will be My age is {$age};
+```

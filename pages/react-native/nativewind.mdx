@@ -1,0 +1,88 @@
+import { Steps } from "nextra/components";
+
+## Introduction
+
+Tailwindcss মোবাইল app এ কাজ করানোর জন্য NativeWind ব্যবহার করতে হবে।
+
+## Installation
+
+<Steps>
+### Step 1
+NativeWind এর ইনস্টল করার জন্য নিচের কমান্ড দিলেই NativeWind এর ইনস্টল করার জন্য pnpm ব্যবহার করতে হবে।
+
+```bash copy
+pnpm install nativewind
+```
+
+### Step 2
+
+Tailwindcss এর ইনস্টল করার জন্য নিচের কমান্ড দিলেই Tailwindcss এর ইনস্টল করার জন্য pnpm ব্যবহার করতে হবে। একদম latest version কাজ করবে না, তাই নির্দিষ্ট version নিতে হবে।
+
+```bash copy
+pnpm add -D tailwindcss@3.4.17
+```
+
+### Step 3
+
+Project এর root director তে tailwind.config.js ফাইল নিতে হবে এবং নিচের কোড রাখতে হবে।
+
+```js copy showLineNumbers filename="tailwind.config.js"
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: ["./app/**/*.{js,jsx,ts,tsx}"],
+  presets: [require("nativewind/preset")],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+};
+```
+
+### Step 4
+
+Project এর root director তে babel.config.js ফাইল নিতে হবে এবং নিচের কোড রাখতে হবে।
+
+```js copy showLineNumbers filename="babel.config.js"
+module.exports = function (api) {
+  api.cache(true);
+  return {
+    presets: [
+      ["babel-preset-expo", { jsxImportSource: "nativewind" }],
+      "nativewind/babel",
+    ],
+  };
+};
+```
+
+### Step 5
+
+Project এর root director তে global.css ফাইল নিতে হবে এবং নিচের কোড রাখতে হবে।
+
+```css copy showLineNumbers filename="global.css"
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+### Step 6
+
+Project এর root director তে metro.config.js ফাইল নিতে হবে এবং নিচের কোড রাখতে হবে।
+
+```js copy showLineNumbers filename="metro.config.js"
+const { getDefaultConfig } = require("expo/metro-config");
+const { withNativeWind } = require("nativewind/metro");
+
+const config = getDefaultConfig(__dirname);
+
+module.exports = withNativeWind(config, { input: "./global.css" });
+```
+
+### Step 7 & Final Step
+`app/_layout.tsx` ফাইল এর মধ্যে global.css file import করতে হবে।
+
+```js copy showLineNumbers filename="app/_layout.tsx"
+import "../global.css";
+```
+
+
+</Steps>

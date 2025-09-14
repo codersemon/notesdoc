@@ -1,0 +1,47 @@
+import { Steps } from "nextra/components";
+
+## Installation
+
+ReactNative এর প্রজেক্ট সেটআপ করার জন্য `Expo` framework ব্যবহার করতে হবে। যদিও `@react-native-community/cli` ব্যবহার করে প্রজেক্ট করা সম্ভব; কিন্তু environment setup জটিল এবং সবকিছুই raw করতে হবে যেটা Development process কে অনেক slow করে ফেলে। তাই সবথেকে সহজ এবং fast development এর জন্য `Expo` framework ব্যবহার করবো।
+
+<Steps>
+### Step 1 
+Nodejs install করা না থাকলে, ইন্সটল করা নিতে হবে। নিচের কমান্ড দিলেই expo project setup complete হয়ে যাবে।
+
+```bash copy
+pnpm create expo-app app-name
+```
+
+### Step 2
+
+এবার আমাদের বানানো app-name directory তে যেতে হবে এবং প্রজেক্ট run করতে হবে।
+
+```bash copy
+cd app-name && pnpm start
+```
+
+### Step 3
+
+Project run হবার পরে `a` প্রেস করলে android, `i` প্রেস করলে ios এবং `w` প্রেস করলে web version run হবে। Simulator/Emulator/Real Device চালু করতে হবে। সেখানে `Expo Go` app install করে নিতে হবে। Expo Go এর মাধ্যমেই আমাদের বানানো app কে run করতে হবে।
+
+</Steps>
+
+## Additional Commands
+
+Run app on android device
+
+```bash copy
+pnpm android
+```
+
+Run app on ios device
+
+```bash copy
+pnpm ios
+```
+
+Clear cache and run app
+
+```bash copy
+pnpm expo start -c
+```

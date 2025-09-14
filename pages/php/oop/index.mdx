@@ -1,0 +1,59 @@
+## OOP - Object Oriented Programming
+
+PHP দুইভাবে programming করা যায়। একটি হচ্ছে `procedural` অন্যটা হচ্ছে `object oriented`. Object oriented system টা বেশি organized & big project এর বেশি ব্যবহার হয়ে থাকে।
+
+## Syntax
+
+class লিখার জন্য `class` keyword এর পরে Classname দিতে হবে। আর ক্লাসের নাম Capitalize করাটা convention, এতে variable & class এর মধ্যে পার্থক্য করা যায়।
+
+```php copy
+class Classname {
+    // code here
+}
+```
+
+### method & property accessing syntax inside class
+
+`$this->` এটি method & syntax এর আগে যুক্ত করে দিলেই access করা যাবে।
+
+```php copy showLineNumbers {6}
+class Student {
+    private $name;
+
+    private function __construct($name)
+    {
+        $this->name = $name;
+    }
+}
+```
+
+### method & property accessing syntax for instance of class
+
+`$this->` এটি method & syntax এর আগে যুক্ত করে দিলেই access করা যাবে।
+
+```php copy showLineNumbers {14,15}
+class Student {
+    private $name;
+
+    private function __construct($name)
+    {
+        $this->name = $name;
+    }
+
+    pubic function getName(){
+        return $this->name;
+    }
+}
+
+$stu1 = new Student("Emon");
+echo $stu1->getName();
+```
+
+## Terminology
+
+- `variable` কে class এর মধ্যে `property` বলা হয়ে থাকে।
+- `function` কে class এর মধ্যে `method` বলা হয়ে থাকে।
+- access modifier: তিন রকমের access modifier আছে। সেগুলো হচ্ছেঃ private, public, protected
+  - private: কোন property বা method এর পূর্বে `private` keyword দিলে সেটা শুধুমাত্র ঐ class এর মধ্যেই access করা যাবে।
+  - public: কোন property বা method এর পূর্বে `public` keyword দিলে সেটা publicly access করা যাবে।
+  - protected: কোন property বা method এর পূর্বে `protected` keyword দিলে সেটা শুধুমাত্র ঐ class কে যে class এ extend করা হবে সেই extended class এর মধ্যে access করা যাবে।

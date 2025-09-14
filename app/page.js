@@ -49,6 +49,18 @@ const notesLink = [
     name: "Tanstack/React Query",
     link: "/tanstack-react-query",
     img: "/images/tanstack-query.png"
+  },
+  {
+    id: 7,
+    name: "React Native",
+    link: "/react-native",
+    img: "/images/reactjs.png"
+  },
+   {
+    id: 8,
+    name: "PHP",
+    link: "/php",
+    img: "/images/php.png"
   }
 ];
 

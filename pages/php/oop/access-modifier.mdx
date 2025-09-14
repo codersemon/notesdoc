@@ -1,0 +1,53 @@
+## Access Modifier 
+এই access modifier এর মাধ্যমে class এর methods & properties access control করা হয়ে থাকে। [Terminology](/php/oop) তে আমরা দেখেছি private, pubic, protected তিন রকমের access modifier আছে।
+
+## private 
+কোন property বা method এর পূর্বে `private` keyword দিলে সেটা শুধুমাত্র ঐ class এর মধ্যেই access করা যাবে। 
+
+নিচের কোডে যে object instance বানানো হয়েছে সেটি একটি  error দেখাবে কেননা, ঐ property শুধুমাত্র ঐ class এর মধ্যেই access করা যাবে।
+```php copy 
+class Student {
+    private $name;
+
+    private function __construct($name)
+    {
+        $this->name = $name;
+    }
+
+    pubic function getName(){
+        return $this->name;
+    }
+}
+
+$stu1 = new Student("Emon");
+echo $stu1->name;
+// output will be an error message;
+```
+
+## public 
+কোন property বা method এর পূর্বে `public` keyword দিলে সেটা publicly access করা যাবে।
+
+নিচের কোডে যে object instance বানানো হয়েছে সেটি একটি  object instance বানানোর সময় যে argument দিবো সেটিই দেখাবে কেননা।
+
+```php copy 
+class Student {
+    private $name;
+
+    private function __construct($name)
+    {
+        $this->name = $name;
+    }
+
+    pubic function getName(){
+        return $this->name;
+    }
+}
+
+$stu1 = new Student("Emon");
+echo $stu1->getName;
+// output will show Emon
+```
+
+## protected 
+কোন property বা method এর পূর্বে `protected` keyword দিলে সেটা শুধুমাত্র ঐ class কে যে class এ extend করা হবে সেই extended class এর মধ্যে access করা যাবে।
+

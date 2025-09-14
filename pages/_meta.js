@@ -17,8 +17,10 @@ const rootRoute = {
   nextjs: "Next JS",
   "react-router-dom": "React Router DOM",
   "tanstack-react-query": "Tanstack/React Query",
+  "react-native": "React Native",
   firebase: "Firebase",
   axios: "Axios",
   "framer-motion": "Framer Motion",
+  php: "PHP",
 };
 export default rootRoute;

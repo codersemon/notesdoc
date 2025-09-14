@@ -1,0 +1,23 @@
+## Variable 
+variable কে পাত্র / বক্স এর সাথে তুলনা করা যায়। একটি পাত্র / বক্স এর মধ্যে যেমন বিভিন্ন ধরনের বস্তু রাখা যায়, তেমনি variable এর মধ্যে আমরা বিভিন্ন ধরনের data রাখতে পারি। প্রতিটা programming language এরই নিজস্ব পদ্ধতি রয়েছে variable লিখার জন্য। 
+
+## Variable লিখার নিয়ম
+- $ sign দিয়ে শুরু করতে হবে 
+- $ sign এর পরে _ (underscore) কিংবা letter দিতে হবে। variable এর নাম কখনই number দিয়ে শুরু করা যাবে না। 
+- variable এর নাম হিসেবে letter, number & underscore ব্যবহার করা যাবে।
+- variable case sensitive. অর্থাৎ $name & $NAME দুইটা আলাদা variable. 
+
+কিছু সঠিক variable এর উদাহরণঃ $name, $_age, $student1 <br/>
+কিছু ভুল variable এর উদাহরণঃ $-name, $2age $student-1 
+
+## var_dump() & gettype()
+একটি variable এর type & value একসাথে দেখার জন্য var_dump() আর শুধুমাত্র type জানার জন্য gettype() built-in function ব্যবহার করা হয়। var_dump() এর ক্ষেত্রে echo/print ব্যবহার করা লাগে না, তবে gettype() এর ক্ষেত্রে echo/print ব্যবহার করা লাগবে দেখানোর জন্য। 
+
+```php copy 
+$age = 27;
+var_dump($age);
+// output: int(27)
+
+echo gettype($age);
+// output: integer
+```

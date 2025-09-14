@@ -1,0 +1,113 @@
+## Types
+
+এই type safety feature এর জন্যই মূলত typescript ব্যবহার করা হয়ে থাকে। কোন variable, functions, class বানানোর সময় আমরা types define করে দিতে পারি। variable এর নামের পরে colon দিয়ে আমাদেরকে data types লিখে দিতে হবে। তাহলে ঐ variable এর মধ্যে নির্ধারিত type ছাড়া অন্য types আসলেই code editor এর মধ্যেই error দেখা যাবে।
+
+### Number
+
+```js copy
+// শুধুমাত্র number লিখা যাবে এই variable এর মধ্যে।
+let roll: number = 10;
+```
+
+### String
+
+```js copy
+// শুধুমাত্র string লিখা যাবে এই variable এর মধ্যে।
+let username: string = "Emon";
+```
+
+### Boolean
+
+```js copy
+// শুধুমাত্র boolean লিখা যাবে এই variable এর মধ্যে।
+let isMarried: boolean = true;
+```
+
+### Any
+
+```js copy
+// এখানে যেকোন types এর data লিখা যাবে।
+let random: any = "game";
+```
+
+### Multiple Option Types
+
+```js copy
+// এখানে number or string লিখা যাবে
+let multiple: number | string = 30;
+multiple = "hello";
+```
+
+### Array
+
+#### Syntax 1:
+
+```js copy
+// method 1: using subscript
+const ages: number[] = [2, 3, 5];
+```
+
+#### Syntax 2:
+
+```js copy
+// method 2: using generic style
+const numbers: Array<number> = [4, 5, 6];
+```
+
+```js copy
+// multi dimensional array
+const nestedArr: number[][] = [
+  [1, 2, 4],
+  [5, 6, 7],
+];
+```
+
+```js copy
+// array with different types of data
+const rand: (string | number)[] = [3, "hello"];
+```
+
+### Tuples
+
+Array & Tuples almost same, কিন্তু একটি basic পার্থক্য রয়েছে। array এর মধ্যে কোন index এ কি type এর data হবে সেটা নির্ধারণ করা হয়না। কিন্তু, tuples এর ক্ষেত্রে নির্ধারণ করে দেওয়া হয় কোন index এ কি type এর data থাকবে।
+
+```js copy
+const student: [number, string, boolean] = [20, "Emon", true];
+```
+
+### Function
+
+function define করার সময় প্রতিটা parameter এর data types এবং function টি কি return করবে সেটাও উল্লেখ করে দিতে হবে।
+
+```js copy {2}
+// taking number as argument and returning number
+function getSum(a: number, b: number): number {
+  return a + b;
+}
+console.log(getSum(2, 7));
+```
+
+#### Optional parameter 
+কোন function এর মধ্যে যে parameter গুলো ব্যবহার হচ্ছে সেগুলোতে data type উল্লেখ করে দিলেই সেগুলো required হয়ে যাবে। যদি কোন parameter optional করতে চাই, সেক্ষেত্রে data type colon এর আগে একটি `?` sign দিয়ে দিতে হবে। নিচে `variable c` কে optional করা হয়েছে। 
+
+```js copy {1}
+function getSum(a: number, b: number, c?: number): number {
+  if (c) return a + b + c;
+  return a + b;
+}
+console.log(getSum(2, 7));
+```
+
+## Accretion / Type Casting
+
+```js
+let str: any = "Hello I'm Emon";
+
+// method 1 : variable as type
+const indexOfE: number = (str as string).indexOf("E");
+console.log(indexOfE);
+
+// method 2: <type>variable
+const indexOfM: number = (<string>str).indexOf("m");
+console.log(indexOfM);
+```

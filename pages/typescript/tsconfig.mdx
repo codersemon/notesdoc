@@ -1,0 +1,18 @@
+{/* dependencies */}
+import { Steps } from "nextra/components";
+
+## tsconfig.json file
+
+এই ফাইলটিকে typescript প্রোজেক্ট এর heart হিসেবে ধরা হয়ে থাকে। এই ফাইলের মধ্যেই typescript এর সকল configuration রাখা থাকে।
+
+<Steps>
+### "target": "es2016"
+target এর মাধ্যমে নির্ধারণ করা হয় কোন syntax এ typescript থেকে javascript এ compile হবে।
+
+### "module": "commonjs"
+এই অপশনটি নির্ধারণ করে কিভাবে TypeScript মডিউলগুলি JavaScript মডিউলে রূপান্তরিত হবে। "commonjs" মানে হল যে TypeScript মডিউলগুলি CommonJS ফরম্যাটে রূপান্তরিত হবে, যা Node.js এ ব্যবহৃত হয়। এটি require এবং module.exports সিনট্যাক্স ব্যবহার করে।
+
+### "outDir": "dist"
+compilled js files কোথায় save হবে সেটা ঠিক করা হয় এই configuration এর মাধ্যমে।
+
+</Steps>
