@@ -1,3 +1,7 @@
+---
+description: "এই hook এর মাধ্যমে আমরা যেকোন function কে cache করে রাখতে পারি। যখন কোন function cache করে রাখার প্রয়োজন হয়, তখন এই hook ব্যবহার করা হয়ে থাকে। আমরা জানি,…"
+---
+
 ## useCallback hook এর ব্যবহারঃ
 
 এই hook এর মাধ্যমে আমরা যেকোন function কে cache করে রাখতে পারি। যখন কোন function cache করে রাখার প্রয়োজন হয়, তখন এই hook ব্যবহার করা হয়ে থাকে। আমরা জানি, প্রতিটা function এবং object react এর কাজে নতুন নতুন reference দিয়ে থাকে প্রতিটা re-render এর সময়। যদিও functions & object একই থাকে, আমাদের দৃষ্টিতে একই রাখছি এবং কোন পরিবর্তন করছি না, তবুও এটি প্রতিটা re-render এ নতুন reference দিয়ে থাকে। যার ফলে, component গুলো re-render করে থাকে। এই সমস্যা থেকে বাঁচার জন্যই আমরা কোন function কে cache করে রাখতে useCallback hook ব্যবহার করে থাকি।

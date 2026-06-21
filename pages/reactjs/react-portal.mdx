@@ -1,3 +1,7 @@
+---
+description: "Modal, Popovers, Tooltip ইত্যাদি যখন react project এ ব্যবহার করি তখন DOM Nodes গুলো DOM এর কোথায় append হবে সেটা আমরা নির্ধারণ করে দিতে পারি না। এতে UI তে…"
+---
+
 ## React Portal
 
 Modal, Popovers, Tooltip ইত্যাদি যখন react project এ ব্যবহার করি তখন DOM Nodes গুলো DOM এর কোথায় append হবে সেটা আমরা নির্ধারণ করে দিতে পারি না। এতে UI তে unexpected behavior হতে পারে। যেমনঃ কোন একটা div tag এর overflow:hidden করে দেওয়ার পরে সেই div এর মধ্যেই যদি modal/popovers/tooltip দেখাতে চাই সেটা z-index দিয়েও দেখানো সম্ভব না। কিন্তু আমরা যদি modal/popovers/tooltip এগুলোর DOM Nodes গুলো body tag বা আমাদের ইচ্ছামত যেকোন Node এর মধ্যে রেখে দিতে পারি, তাহলে overflow:hidden দেওয়ার পরেও সেই modal/popovers/tooltip ইচ্ছামত দেখাতে পারবো। আর এই ইচ্ছামত স্থানে DOM Nodes রাখতেই React Portal আমাদেরকে সাহায্য করে থাকে।

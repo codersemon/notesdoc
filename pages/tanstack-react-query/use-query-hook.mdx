@@ -1,3 +1,7 @@
+---
+description: "Data fetch & reFetch করার জন্য useQuery hook ব্যবহার করা হয়ে থাকে। এই hook দিয়ে dataFetch related কাজ করা হয়ে থাকে। একটা জিনিস মনে রাখতে হবে, ReactQuery…"
+---
+
 ## useQuery Hook পরিচিতি
 
 Data fetch & reFetch করার জন্য `useQuery` hook ব্যবহার করা হয়ে থাকে। এই hook দিয়ে dataFetch related কাজ করা হয়ে থাকে। একটা জিনিস মনে রাখতে হবে, ReactQuery নিজে সরাসরি API request send করতে পারে না। এটি server & client এর মধ্যে communication এ help করে থাকে। যেমন, client এ এখন যে ডেটা আছে সেটা server এর সাথে sync না, RQ নিজের থেকে সার্ভারে যে system এর মাধ্যমে data fetch করা হচ্ছে, সেটাকে বলে দিবে আমাকে আপডেট ডেটা দাও, তখন সার্ভার আপডেট ডেটা দিবে, আর RQ নিজের state এ সেটাকে আপডেট করে client এ দেখাবে। data fetch system হতে পারে axios, browser এর default fetch api বা অন্য কোন fetching library.

@@ -61,6 +61,12 @@ const notesLink = [
     name: "PHP",
     link: "/php",
     img: "/images/php.png"
+  },
+  {
+    id: 9,
+    name: "Prompts",
+    link: "/prompts",
+    img: "/images/prompts.png"
   }
 ];
 

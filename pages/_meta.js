@@ -22,5 +22,6 @@ const rootRoute = {
   axios: "Axios",
   "framer-motion": "Framer Motion",
   php: "PHP",
+  prompts: "Prompts",
 };
 export default rootRoute;

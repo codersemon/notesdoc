@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://learn.emonkhan.me
+
+# Sitemaps
+Sitemap: https://learn.emonkhan.me/sitemap.xml

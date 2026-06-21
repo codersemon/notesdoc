@@ -1,0 +1,159 @@
+---
+description: "যেকোনো একটা website page কে pixel-perfect ভাবে Elementor-এ clone করার জন্য এই prompt। নিচের {{placeholders}} গুলো নিজের তথ্য দিয়ে পূরণ করো, তারপর…"
+---
+
+import { Callout, Steps } from "nextra/components";
+
+# Clone a Website into Elementor (Novamira MCP)
+
+যেকোনো একটা website page কে **pixel-perfect** ভাবে Elementor-এ clone করার জন্য এই prompt।
+নিচের `{{placeholders}}` গুলো নিজের তথ্য দিয়ে পূরণ করো, তারপর end-to-end চালাও।
+
+<Callout type="info">
+  নিচের block-এ **copy** বাটনে ক্লিক করলে পুরো prompt copy হয়ে যাবে। এর নিচের অংশে
+  একই prompt section by section বাংলায় বুঝিয়ে দেওয়া আছে।
+</Callout>
+
+## Copy the full prompt
+
+পুরো prompt একসাথে নিতে চাইলে এই block টা copy করো।
+
+```text copy
+TASK: Pixel-perfect clone a web page into Elementor on the novamira MCP site.
+
+SOURCE URL: {{https://example.com/page}}
+TARGET SITE: novamira MCP (devswizard.com)   ← final page lives here
+PAGE TITLE / SLUG: {{Retreat — And So We Rise / retreat-and-so-we-rise}}
+PUBLISH STATUS: {{publish | draft}}
+
+
+SCOPE:
+- Build {{body sections only}}  (options: body only / body + header + footer)
+- Keep all text EXACTLY as source, in original language (verbatim).
+- Copy all source images into the target site's media library (no hotlinking).
+- Match fonts, colors, font sizes, weights, letter-spacing, spacing, and section
+  backgrounds as closely as possible.
+- Replicate entrance/scroll animations (fade/slide-in as elements enter viewport).
+
+
+BUILD CONSTRAINTS (hard rules):
+- Use Containers + Elementor FREE widgets only (Heading, Text Editor, Image, Button,
+  Icon List, etc.).
+- Do NOT use: the atomic/V4 editor, the HTML widget, or inner-sections.
+- For multi-item layouts (cards, grids, numbered lists), Text Editor with inline
+  CSS is allowed (it's a free widget) — just never the HTML widget.
+- If a free widget genuinely can't do it, install "Essential Addons for Elementor"
+  and use that; tell me when you do.
+
+
+PROCESS (do all of this without asking me — these are my standing answers):
+1. Screenshot the source at desktop / tablet / mobile. The source may sit behind a
+   bot/cert wall — use a headed browser with a clearance wait to get past it.
+
+2. Extract exact text, fonts, colors, sizes, and image URLs from the source DOM
+   (not from screenshots) for accuracy.
+
+3. Download source images (through the cleared browser session if they're bot-blocked),
+   upload them to the novamira server, and register them as media attachments.
+
+4. Build the page directly on the live novamira site. First check the available
+   Elementor MCP server/tools and confirm they point at novamira, then build there.
+
+5. Add entrance animations to all content widgets (fadeInUp, slow, staggered delay).
+
+6. After any change to the ported page, purge Elementor cache: delete _elementor_css,
+   delete the _elementor_element_cache postmeta, and disable the element-cache
+   experiment (it serves stale image/HTML otherwise).
+
+7. VERIFY: screenshot the final novamira page at all 3 viewports and compare
+   side-by-side with the source. Force lazy images to load before screenshotting.
+   Fix any gaps, then report what matches and any remaining differences.
+
+
+DELIVERABLES:
+- Live URL of the published page.
+- Short list of sections built, and any intentional deviations (e.g. header/footer
+  left as theme default per scope).
+
+
+Ask me first ONLY if: the source is unreachable, the MCP site is misconfigured,
+or a constraint above is impossible. Otherwise proceed end-to-end.
+```
+
+---
+
+## Task
+
+মূল কাজ — একটা web page কে Elementor-এ pixel-perfect clone করা। নিচের ঘরগুলো পূরণ করতে হবে।
+
+| Field | Value |
+| --- | --- |
+| **Source URL** | `{{https://example.com/page}}` |
+| **Target site** | Novamira MCP (devswizard.com) — final page এখানেই থাকবে |
+| **Page title / slug** | `{{Retreat — And So We Rise / retreat-and-so-we-rise}}` |
+| **Publish status** | `{{publish \| draft}}` |
+
+## Scope
+
+কতটুকু আর কীভাবে build হবে তার সীমা।
+
+- `{{body sections only}}` build করবে — option: _body only_ / _body + header + footer_।
+- সব text হুবহু source-এর মতো, **original ভাষায়** রাখবে (verbatim)।
+- সব image target site-এর media library-তে copy করবে — **hotlink করবে না**।
+- Font, color, size, weight, letter-spacing, spacing, section background যতটা সম্ভব হুবহু মেলাবে।
+- Entrance / scroll animation (element viewport-এ আসলে fade / slide-in) replicate করবে।
+
+## Build constraints (hard rules)
+
+এগুলো কঠিন নিয়ম — ভাঙা যাবে না।
+
+- শুধু **Container + Elementor FREE widget** ব্যবহার করবে — Heading, Text Editor, Image, Button, Icon List ইত্যাদি।
+- **ব্যবহার করবে না:** atomic / V4 editor, HTML widget, বা inner-section।
+- Card / grid / numbered list-এর জন্য inline CSS সহ Text Editor চলবে (এটা free widget) — কিন্তু **কখনো** HTML widget না।
+- Free widget দিয়ে সত্যিই না হলে **Essential Addons for Elementor** install করবে — আর আমাকে জানাবে।
+
+## Process
+
+এগুলো standing answer — আমাকে জিজ্ঞেস না করে নিজে থেকেই করবে।
+
+<Steps>
+### Screenshot the source
+
+Desktop / tablet / mobile — তিন viewport-এ screenshot নাও। Source bot / cert wall-এর পিছনে থাকতে পারে — তাই headed browser + clearance wait দিয়ে পার হও।
+
+### Extract from the DOM
+
+Screenshot থেকে নয়, সরাসরি source **DOM** থেকে exact text, font, color, size, image URL বের করো — তাহলে নির্ভুল হবে।
+
+### Move the images
+
+Source image গুলো download করো (bot-blocked হলে cleared browser session দিয়ে), Novamira server-এ upload করো, আর media attachment হিসেবে register করো।
+
+### Build the page
+
+সরাসরি live Novamira site-এ build করো। আগে available Elementor MCP server / tool গুলো check করে নিশ্চিত হও যে সেগুলো Novamira-কেই point করছে, তারপর ওখানেই build করো।
+
+### Animate
+
+সব content widget-এ entrance animation দাও — `fadeInUp`, slow, staggered delay।
+
+### Purge cache
+
+ported page-এ যেকোনো পরিবর্তনের পর Elementor cache purge করো: `_elementor_css` delete, `_elementor_element_cache` postmeta delete, আর element-cache experiment disable করো (নাহলে পুরোনো image / HTML দেখায়)।
+
+### Verify
+
+Final Novamira page তিন viewport-এ screenshot নিয়ে source-এর সাথে পাশাপাশি মেলাও। আগে lazy image গুলো load করিয়ে নাও। Gap থাকলে ঠিক করো, তারপর কী মিলেছে আর কী বাকি আছে report করো।
+</Steps>
+
+## Deliverables
+
+কাজ শেষে যা যা দিতে হবে।
+
+- Published page-এর live URL।
+- কোন কোন section build হয়েছে তার ছোট list, আর কোনো ইচ্ছাকৃত পার্থক্য থাকলে তা (যেমন scope অনুযায়ী header / footer theme default রাখা)।
+
+<Callout type="warning">
+  শুধু তখনই আগে জিজ্ঞেস করবে যদি: source-এ পৌঁছানো না যায়, দুই MCP site misconfigured থাকে,
+  বা উপরের কোনো constraint মানা অসম্ভব হয়। নাহলে end-to-end এগিয়ে যাও।
+</Callout>
