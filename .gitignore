@@ -34,3 +34,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# pnpm 11 local-only (Vercel uses pnpm 9, which errors on this workspace file)
+pnpm-workspace.yaml
