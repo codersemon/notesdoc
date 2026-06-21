@@ -22,6 +22,9 @@ export const metadata = {
   description: DESCRIPTION,
   authors: [{ name: "Emon Khan" }],
   alternates: { canonical: "/" },
+  verification: {
+    google: "1PKMQUxS_6PMuHZnIHfrT5UxPi6n3UzGvEvb4Lhr6I0",
+  },
   openGraph: {
     type: "website",
     siteName: "Emon Khan Notes",
