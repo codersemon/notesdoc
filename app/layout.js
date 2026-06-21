@@ -12,9 +12,34 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
+const SITE_URL = "https://learn.emonkhan.me";
+const DESCRIPTION =
+  "Emon Khan-er personal dev notes — JavaScript, TypeScript, React, Next.js, Firebase, PHP, React Native ar reusable AI prompt library. Bangla + English mixed.";
+
 export const metadata = {
-  title: "Welcome to handnotes website",
-  description: "All personal notes documentation by Emon Khan",
+  metadataBase: new URL(SITE_URL),
+  title: "Emon Khan — Dev Notes & Prompt Library",
+  description: DESCRIPTION,
+  authors: [{ name: "Emon Khan" }],
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: "Emon Khan Notes",
+    url: SITE_URL,
+    title: "Emon Khan — Dev Notes & Prompt Library",
+    description: DESCRIPTION,
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Emon Khan — Dev Notes & Prompt Library" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Emon Khan — Dev Notes & Prompt Library",
+    description: DESCRIPTION,
+    images: ["/og.png"],
+  },
+};
+
+export const viewport = {
+  themeColor: "#0a0f1e",
 };
 
 export default function RootLayout({ children }) {
